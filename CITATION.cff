@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+title: >-
+  BCAT: Bounded Confidence and Adoption Threshold Model
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Chung-Yuan
+    family-names: Huang
+    affiliation: >-
+      Department of Computer Science and Information
+      Engineering, Chang Gung University, Taiwan
+  - given-names: Sheng-Wen
+    family-names: Wang
+    affiliation: >-
+      Department of Finance and Information, National
+      Kaohsiung University of Science and Technology, Taiwan
+    email: swwang@nkust.edu.tw
+repository-code: 'https://github.com/canslab1/BCAT'
+url: 'https://github.com/canslab1/BCAT'
+abstract: >-
+  A mixed opinion dynamics and innovation diffusion
+  simulation model that integrates a bounded confidence-based
+  opinion dynamics model with an adoption threshold model to
+  explore the "best game no one played" phenomenon. The model
+  simulates opinion exchanges and product acceptance behaviors
+  across four types of theoretical social networks (regular
+  lattice, random, small-world, and scale-free) with 400
+  agents. Implementations are provided in both Python 3 and
+  NetLogo 4.0.5.
+keywords:
+  - opinion dynamics
+  - adoption threshold
+  - diffusion of innovation
+  - agent-based modeling
+  - bounded confidence
+  - social networks
+  - computational social science
+license: MIT
+version: 1.0.0
+date-released: '2025-01-01'
+preferred-citation:
+  type: article
+  authors:
+    - given-names: Chung-Yuan
+      family-names: Huang
+    - given-names: Sheng-Wen
+      family-names: Wang
+  title: >-
+    Exploring the "Best Game No One Played" Phenomenon Using
+    A Mixed Opinion Dynamics and Innovation Diffusion Model
+  journal: PLOS ONE
+  year: 2025

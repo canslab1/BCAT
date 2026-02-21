@@ -1,0 +1,41 @@
+{
+    "description": "Sensitivity analysis configuration for 1000 experimental runs (Table 2, Figs. 7-9)",
+    "parameters": {
+        "no_of_pioneers": 5,
+        "clustered_pioneers": true,
+        "convergence_rate": 0.1,
+        "network_type": "SWN/RN/CA",
+        "rewiring_probability": 0.0,
+        "max_time": 300,
+        "no_of_experiments": 1000
+    },
+    "sensitivity_variables": {
+        "bounded_confidence": {
+            "values": [10, 20, 30, 40, 50, 60, 70, 80, 90],
+            "default": 50
+        },
+        "avg_of_attitudes": {
+            "values": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+            "default": 50
+        },
+        "std_of_attitudes": {
+            "values": [0, 5, 10, 15, 20, 25, 30],
+            "default": 10
+        },
+        "avg_of_thresholds": {
+            "values": [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
+            "default": 40
+        },
+        "std_of_thresholds": {
+            "values": [0, 5, 10, 15, 20, 25, 30],
+            "default": 10
+        }
+    },
+    "network_types_tested": [
+        {"network_type": "SWN/RN/CA", "rewiring_probability": 0.0, "label": "Regular Lattice (CA)"},
+        {"network_type": "SWN/RN/CA", "rewiring_probability": 0.3, "label": "Small-World (SWN)"},
+        {"network_type": "SWN/RN/CA", "rewiring_probability": 1.0, "label": "Random (RN)"},
+        {"network_type": "SFN", "rewiring_probability": null, "label": "Scale-Free (SFN)"}
+    ],
+    "note": "Each combination of parameter value and network type requires 1000 independent simulation runs. When varying one parameter, all other parameters remain at their default values."
+}

@@ -1,0 +1,22 @@
+{
+    "description": "Fig. 11: Downward compatibility - adoption threshold model only (opinion dynamics removed)",
+    "parameters": {
+        "no_of_pioneers": 3,
+        "clustered_pioneers": true,
+        "bounded_confidence": 0,
+        "convergence_rate": 0.1,
+        "avg_of_attitudes": 100,
+        "std_of_attitudes": 0,
+        "avg_of_thresholds": 20,
+        "std_of_thresholds": 10,
+        "network_type": "SWN/RN/CA",
+        "rewiring_probability": 0.0,
+        "max_time": 50
+    },
+    "expected_outcome": {
+        "description": "All agents adopt within 50 ticks. Adoption dynamics show characteristic S-curve. New adopter dynamics show peak at critical point. No opinion exchange occurs (bounded-confidence=0).",
+        "FRI": "1.0 (all attitudes fixed at 100)",
+        "GSI": "1.0 (complete adoption)"
+    },
+    "note": "Validates BCAT downward compatibility with pure adoption threshold models. Setting bounded-confidence=0 disables opinion exchange. Setting avg-of-attitudes=100 with std=0 gives all agents identical maximum attitudes."
+}

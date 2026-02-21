@@ -1,0 +1,22 @@
+{
+    "description": "Fig. 5: Favorable review but poor sales scenario (regular lattice)",
+    "parameters": {
+        "no_of_pioneers": 5,
+        "clustered_pioneers": true,
+        "bounded_confidence": 50,
+        "convergence_rate": 0.1,
+        "avg_of_attitudes": 50,
+        "std_of_attitudes": 10,
+        "avg_of_thresholds": 40,
+        "std_of_thresholds": 10,
+        "network_type": "SWN/RN/CA",
+        "rewiring_probability": 0.0,
+        "max_time": 300
+    },
+    "expected_outcome": {
+        "description": "Agent attitudes converge toward positive values (avg ~72), but only a small fraction adopt the product. Demonstrates the 'best game no one played' phenomenon.",
+        "FRI": "High (most agents hold positive attitudes)",
+        "GSI": "Low (very few agents adopt, e.g., GSI ~0.02)"
+    },
+    "note": "This scenario uses identical parameters to Fig. 4 except avg-of-thresholds=40 and std-of-thresholds=10, demonstrating the critical role of adoption thresholds."
+}

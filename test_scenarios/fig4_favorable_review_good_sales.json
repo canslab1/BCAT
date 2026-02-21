@@ -1,0 +1,22 @@
+{
+    "description": "Fig. 4: Favorable review and good sales scenario (regular lattice)",
+    "parameters": {
+        "no_of_pioneers": 5,
+        "clustered_pioneers": true,
+        "bounded_confidence": 50,
+        "convergence_rate": 0.1,
+        "avg_of_attitudes": 50,
+        "std_of_attitudes": 10,
+        "avg_of_thresholds": 20,
+        "std_of_thresholds": 5,
+        "network_type": "SWN/RN/CA",
+        "rewiring_probability": 0.0,
+        "max_time": 300
+    },
+    "expected_outcome": {
+        "description": "All agents adopt the product (GSI = 1). Average attitude converges to approximately 76. Critical point emerges early in the simulation.",
+        "FRI": "1.0 (all agents have positive attitudes)",
+        "GSI": "1.0 (all agents adopt)"
+    },
+    "note": "Due to stochastic initialization, individual run outcomes may vary. Run 1000 experiments to obtain statistically significant results."
+}

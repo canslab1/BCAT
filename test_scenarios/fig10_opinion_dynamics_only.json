@@ -1,0 +1,22 @@
+{
+    "description": "Fig. 10: Downward compatibility - bounded confidence opinion dynamics model only (adoption removed)",
+    "parameters": {
+        "no_of_pioneers": 0,
+        "clustered_pioneers": true,
+        "bounded_confidence": 10,
+        "convergence_rate": 0.4,
+        "avg_of_attitudes": 50,
+        "std_of_attitudes": 20,
+        "avg_of_thresholds": 100,
+        "std_of_thresholds": 0,
+        "network_type": "SWN/RN/CA",
+        "rewiring_probability": 0.0,
+        "max_time": 300
+    },
+    "expected_outcome": {
+        "description": "No adoption occurs (GSI = 0). Opinion exchanges produce attitude clustering consistent with standard bounded confidence models. Std of attitudes decreases from 20 to approximately 18.",
+        "FRI": "Variable (depends on clustering outcome)",
+        "GSI": "0.0 (no adoption possible)"
+    },
+    "note": "Validates BCAT downward compatibility with pure opinion dynamics models. Setting avg-of-thresholds=100 with std=0 and no-of-pioneers=0 ensures zero adoption."
+}

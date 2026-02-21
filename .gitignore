@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+*.pkl
+manuscript.docx
+manuscript.txt
+profile_bcat.py
+.claude/
+
+# Experiment output (large files)
+experiments/
+output/
+Attitude-Trajectory-*.jpeg
