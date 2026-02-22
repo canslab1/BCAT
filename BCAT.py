@@ -999,6 +999,15 @@ class OpinionAdoptionModel:
             std_att  = float(np.std(att_col, ddof=1)) if n_total > 1 else 0.0
             results.append((adopters, non_adopters, mean_att, std_att))
 
+            # ─── 記錄態度快照 (供 Attitude Trajectory 圖和 save/load 重播) ───
+            # 與 step() 中相同的邏輯，在 current_time += 1 之前記錄
+            snapshot = {}
+            for v in att_col:
+                iv = int(v)
+                if iv == v:
+                    snapshot[iv] = snapshot.get(iv, 0) + 1
+            self._attitude_snapshots[self.current_time] = snapshot
+
             # 記錄數據 (exp_id > 0 時)
             if exp_id > 0 and self.current_time < len(self.adopter_list):
                 self.adopter_list[self.current_time] += (
@@ -1536,13 +1545,17 @@ class OpinionAdoptionModel:
             results = self.go(exp_id=exp_no)
 
             # ─── file-close ───
-            # 寫入實驗數據 (對應 NetLogo 的 file-print)
-            # 修正: 使用 go() 迴圈中即時擷取的 mean_att/std_att (而非最終狀態)
-            # NetLogo 在 while 迴圈內呼叫 file-print 記錄當下的 att 統計
+            # 寫入實驗數據
+            # 對應 NetLogo: file-print (word exp-ID ":" ticks ":act:" ... ":att:" mean ... ":" standard-deviation ...)
+            # NetLogo 的 word 會用預設精度輸出浮點數 (無尾端零)，Python 用 repr 對應
             with open(exp_filename, 'w') as f:
                 for t, (adopters, non_adopters, mean_att, std_att) in enumerate(results):
+                    # repr(float) 輸出最短且能唯一識別該浮點數的表示法，
+                    # 行為與 NetLogo 的 word 對浮點數的轉換一致 (無尾端零、無固定小數位)
+                    mean_str = repr(mean_att)
+                    std_str  = repr(std_att)
                     f.write(f"{exp_no}:{t}:act:{adopters}:{non_adopters}"
-                            f":att:{mean_att:.6f}:{std_att:.6f}\n")
+                            f":att:{mean_str}:{std_str}\n")
                 f.write(f"critical-point:{self.critical_time}\n")
 
             # ─── export-world (word "experiment-" exp-no "-world") ───
@@ -1558,9 +1571,13 @@ class OpinionAdoptionModel:
         self.adopter_list = [_nl_round(a) for a in self.adopter_list]
 
         # ─── 保存總結果 ───
+        # 格式對應 NetLogo 的 file-print (word "critical-points:" critical-time-list)
+        # NetLogo list 格式使用空格分隔: [0 45 23]，非 Python 的 [0, 45, 23]
         with open(os.path.join(output_dir, "experiment.txt"), 'w') as f:
-            f.write(f"critical-points:{self.critical_time_list}\n")
-            f.write(f"adopters:{self.adopter_list}\n")
+            crit_str  = '[' + ' '.join(str(x) for x in self.critical_time_list) + ']'
+            adopt_str = '[' + ' '.join(str(x) for x in self.adopter_list) + ']'
+            f.write(f"critical-points:{crit_str}\n")
+            f.write(f"adopters:{adopt_str}\n")
 
     # =========================================================================
     # NetLogo: import-simulation / export-world
@@ -1590,6 +1607,7 @@ class OpinionAdoptionModel:
             'node_states': node_states_dict,
             'critical_time': self.critical_time,
             'current_time': self.current_time,
+            'attitude_snapshots': self._attitude_snapshots,
             'parameters': {
                 'no_of_pioneers':       self.no_of_pioneers,
                 'clustered_pioneers':   self.clustered_pioneers,
@@ -1618,9 +1636,21 @@ class OpinionAdoptionModel:
              let world-file user-file
              if (world-file != false) [ import-world world-file ]
           end
+
+        視覺化歷史重建:
+          .pkl 檔案保存了 attitude_snapshots (Attitude Trajectory 所需)。
+          Adoption Dynamics 和 New Adopter Dynamics 則從節點的 time 欄位
+          (採納時間) 精確反推重建，無需額外保存。
         """
         with open(filename, 'rb') as f:
             data = pickle.load(f)
+
+        # ─── 清除舊的視覺化歷史資料 ───
+        # 對應 NetLogo 的 clear-all (在 import-simulation 中)
+        self._attitude_snapshots = {}
+        self._new_adopters_per_tick = []
+        self._adopters_per_tick = []
+        self._non_adopters_per_tick = []
 
         self.G             = data['G']
         self.critical_time = data['critical_time']
@@ -1649,6 +1679,49 @@ class OpinionAdoptionModel:
         self.rewiring_probability = params['rewiring_probability']
         self.max_time             = params['max_time']
         self.no_of_experiments    = params.get('no_of_experiments', 20)
+
+        # ─── 重建視覺化歷史資料 ───
+        # 1. 態度快照: 從 .pkl 載入 (向後相容: 舊版 .pkl 無此欄位時生成最終狀態)
+        self._attitude_snapshots = data.get('attitude_snapshots', {})
+        if not self._attitude_snapshots and self.current_time > 0:
+            att_col = self._states[:, self._ATT]
+            snapshot = {}
+            for v in att_col:
+                iv = int(v)
+                if iv == v:
+                    snapshot[iv] = snapshot.get(iv, 0) + 1
+            self._attitude_snapshots[self.current_time - 1] = snapshot
+
+        # 2. 採納動態: 從節點 time 欄位精確反推
+        self._reconstruct_adoption_history()
+
+    def _reconstruct_adoption_history(self):
+        """
+        從節點的 time 欄位反推每步的採納動態歷史資料。
+
+        每個節點的 time 欄位記錄了該節點的採納時間:
+          time = -1  → 尚未採納
+          time = 0   → 先驅者 (初始即採納)
+          time = t   → 在第 t 步採納
+
+        從這些資訊可精確重建:
+          _adopters_per_tick:     每步的累計採用者數
+          _non_adopters_per_tick: 每步的未採用者數
+          _new_adopters_per_tick: 每步新增的採用者數
+        """
+        if self.G is None or self._states.shape[0] == 0 or self.current_time == 0:
+            return
+
+        n_total = self._states.shape[0]
+        time_col = self._states[:, self._TIME]
+
+        for t in range(self.current_time):
+            new_adopters = int(np.sum(time_col == t))
+            self._new_adopters_per_tick.append(new_adopters)
+
+            adopters = int(np.sum((time_col >= 0) & (time_col <= t)))
+            self._adopters_per_tick.append(adopters)
+            self._non_adopters_per_tick.append(n_total - adopters)
 
 
 # =============================================================================
