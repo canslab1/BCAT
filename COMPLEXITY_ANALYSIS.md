@@ -1,583 +1,596 @@
-# BCAT 模擬程式完整時間複雜度與空間複雜度分析
+# Computational Complexity Analysis of the BCAT Simulation Framework
 
-## 符號定義 (Formal Notation)
+## Abstract
 
-| 符號 | 定義 | 預設值 |
-|------|------|--------|
-| **N** | 節點數 (number of nodes) | 400 |
-| **T** | 最大模擬步數 (max_time) | 100-300 |
-| **E** | 邊數 (number of edges) | SWN: ~1600, SFN: ~2000 |
-| **K** | 每節點平均鄰居數 (average degree) | SWN: ~8, SFN: ~10 |
-| **P** | 先驅者數量 (no_of_pioneers) | 5 |
-| **X** | 實驗次數 (no_of_experiments) | 20 |
-| **D_max** | 最大節點度 (maximum degree) | SFN 可達 ~60 |
-| **W** | 網格寬度 (grid width) | 20 (W^2 = N = 400) |
-| **U** | 不同整數態度值數量 | U <= 100 |
-| **d(i)** | 節點 i 的度數 (degree) | varies |
+This document presents a rigorous time and space complexity analysis of the Bounded Confidence with Adoption Threshold (BCAT) agent-based simulation framework. The BCAT model integrates bounded confidence opinion dynamics with threshold-based adoption decisions on complex network topologies, including scale-free networks (SFN) and small-world networks (SWN). We formally define the model as a five-tuple and derive tight asymptotic bounds for all major algorithmic components. Our analysis demonstrates that a single simulation run executes in O(N² + T(N + E)) time and O(N + E + T) space, where N denotes the number of agents, T the number of time steps, and E the number of edges. For sparse networks with bounded average degree, the dominant term reduces to O(TN). A batch of X experiments requires O(X · T · (N + E)) time overall.
 
 ---
 
-## 1. 網絡建構 (Network Construction)
+## 1. Introduction
 
-### 1.1 無尺度網絡 `setup_scale_free_network()` (line 522-585)
+Agent-based models (ABMs) of innovation diffusion on complex networks are widely employed in computational social science to study how technologies, behaviors, and opinions propagate through populations (Rogers, 2003; Watts & Strogatz, 1998; Barabási & Albert, 1999). The computational cost of such simulations is a critical concern when scaling to large populations or conducting extensive parameter sweeps.
 
-**演算法定義:**
-> **Barabasi-Albert 優先附著 (Preferential Attachment)** 的變體。
-> 逐步加入 N 個節點，每個新節點透過輪盤賭選擇 (roulette wheel selection) 連接一個已有節點。
-> 之後對每個節點再透過 `_add_link` 追加 3 條邊。
+The BCAT framework couples two well-established mechanisms: (i) *bounded confidence opinion dynamics* (Deffuant et al., 2000; Hegselmann & Krause, 2002), wherein agents update their attitudes only when the opinion distance to a neighbor falls below a confidence threshold; and (ii) *threshold-based adoption* (Granovetter, 1978; Valente, 1996), wherein agents adopt an innovation when the fraction of adopting neighbors exceeds a personal threshold.
 
-**時間複雜度:**
-
-| 階段 | 操作 | 複雜度 |
-|------|------|--------|
-| 初始兩節點 | `add_node`, `add_edge` | O(1) |
-| 398 次 `_find_partner` + `add_edge` | 每次 `_find_partner` 掃描 i 個節點 (i=2..399) | sum(i=2..399) O(i) = **O(N^2)** |
-| 1 次 `_add_link(0)` | 最壞情況 `_find_partner` x 重試 | O(N) 攤銷 |
-| 400x3 = 1200 次 `_add_link` | 每次含 `_find_partner` O(N) x 期望 O(1) 重試 | **O(N^2)** |
-| `_set_pos_xy_of_nodes` | 遍歷 N 節點 + `nx.set_node_attributes` | O(N) |
-
-**`_find_partner()`** (line 587-636):
-- 輪盤賭選擇: 掃描所有已有節點的度數序列直到累積超過隨機閾值
-- 時間: **O(N)** 最壞情況，期望 O(N/2)
-
-**`_add_link()`** (line 638-688):
-- 外層 while 迴圈最多 N 次嘗試
-- 每次呼叫 `_find_partner()` O(N)
-- `G.has_edge()` O(1) (networkx adjacency dict)
-- 期望嘗試次數: O(1) (因為網絡稀疏，大多數節點對之間沒有邊)
-- **最壞 O(N^2)**，**期望 O(N)**
-
-**SFN 建構總時間: O(N^2)**
-
-**空間複雜度:**
-- `_degree_list`: O(N)
-- networkx Graph: O(N + E)，其中 E ~ 4N (每節點平均 ~8-10 度)
-- **空間: O(N + E) = O(N)** (因 E = O(N))
+This document provides a comprehensive complexity analysis of the BCAT simulation codebase, covering network construction, agent initialization, the core simulation loop, batch experimentation, data persistence, and visualization. All bounds are stated in standard asymptotic notation and verified against the implementation.
 
 ---
 
-### 1.2 小世界網絡 `setup_small_world_network()` (line 726-827)
+## 2. Notation and Definitions
 
-**演算法定義:**
-> **Watts-Strogatz 小世界模型。** 在 WxW 二維環形格子 (torus lattice) 上建立 Moore 鄰域 (8-connected) 邊，然後以機率 p 對每條邊進行重連 (rewiring)。
+### 2.1 Symbol Table
 
-**時間複雜度:**
+| Symbol | Definition | Default Value |
+|--------|-----------|---------------|
+| *N* | Number of nodes (agents) | 400 |
+| *T* | Maximum number of simulation time steps | 100–300 |
+| *E* | Number of edges in the network | SWN: ~1,600; SFN: ~2,000 |
+| *K* | Average node degree | SWN: ~8; SFN: ~10 |
+| *P* | Number of pioneer (seed) agents | 5 |
+| *X* | Number of experimental replications | 20 |
+| *D*_max | Maximum node degree | SFN: up to ~60 |
+| *W* | Grid width (for SWN lattice) | 20 (W² = N = 400) |
+| *U* | Number of distinct integer attitude values | U ≤ 100 |
+| *d(v)* | Degree of node *v* | varies |
+| *p* | Rewiring probability (Watts–Strogatz) | [0, 1] |
+| *μ* | Convergence rate for opinion update | (0, 1) |
+| *β* | Bounded confidence threshold | > 0 |
 
-| 階段 | 操作 | 複雜度 |
-|------|------|--------|
-| 建立 N 節點 | N 次 `add_node` | O(N) |
-| 建立 Moore 鄰域邊 | 每節點檢查 8 方向 x `has_edge` O(1) | O(8N) = **O(N)** |
-| 重連 (rewiring) | 遍歷 E 條邊 | O(E) |
-| 每條邊的重連 | 建構 `non_neighbors` 列表: O(N) | O(pEN) = **O(pN^2)** |
-| 節點位置設定 | O(N) | O(N) |
+### 2.2 Formal Model Definition
 
-**重連步驟的嚴格分析 (line 796-819):**
+**Definition 1** (BCAT Model). The BCAT model is defined as a five-tuple **M** = (*G*, *S*, Π, Φ, Ψ), where:
+
+- *G* = (*V*, *E*) is an undirected graph with |*V*| = *N* and |*E*| = *E*.
+- *S*: *V* → [1, 100] × [1, 100] × {0, 1} × (ℤ ∪ {−1}) is a state function mapping each node *v* to a tuple (*att*_v, *θ*_v, *act*_v, *time*_v), representing its attitude, adoption threshold, adoption status, and adoption time, respectively.
+- Π = {*μ*, *β*, *P*, *T*} is the parameter set comprising the convergence rate, bounded confidence threshold, number of pioneers, and maximum simulation time.
+- Φ: *S* × *S* × Π → *S* × *S* is the opinion update function (bounded confidence dynamics).
+- Ψ: *S* × 2^*V* → *S* is the adoption decision function (threshold model).
+
+**Definition 2** (Opinion Update Function Φ). Given node *i* and a uniformly randomly selected neighbor *j* ∈ *N*(*i*), if |*att*_i − *att*_j| < *β*, then:
+
+- **Rule 1** (Bilateral convergence):
+  *att*'_i = ⌊*att*_i + *μ*(*att*_j − *att*_i) + 0.5⌋,
+  *att*'_j = ⌊*att*_j + *μ*(*att*_i − *att*_j) + 0.5⌋
+
+- **Rule 2** (Unilateral — subject only):
+  *att*'_i = ⌊*att*_i + *μ*(*att*_j − *att*_i) + 0.5⌋
+
+- **Rule 3** (Unilateral — partner only):
+  *att*'_j = ⌊*att*_j + *μ*(*att*_i − *att*_j) + 0.5⌋
+
+The rule selection depends on the adoption states and relative attitudes of both agents:
+
+| *act*_i | *act*_j | *att*_j > *att*_i | Applied Rule |
+|---------|---------|-------------------|-------------|
+| 0 | 1 | True | Rule 2 |
+| 0 | 1 | False | Rule 1 |
+| 1 | 0 | True | Rule 1 |
+| 1 | 0 | False | Rule 3 |
+| 1 | 1 | True | Rule 2 |
+| 1 | 1 | False | Rule 3 |
+| 0 | 0 | * | Rule 1 |
+
+**Definition 3** (Adoption Decision Function Ψ). For node *i* at time step *t*:
+
+```
+Ψ(i, t) =
+  act_i ← 1, time_i ← t   if  act_i = 0
+                             ∧   att_i > 50
+                             ∧   |N(i)| > 0
+                             ∧   |{j ∈ N(i) : act_j = 1}| / |N(i)| ≥ θ_i / 100
+  unchanged                  otherwise
+```
+
+**Definition 4** (Simulation Loop). The main simulation procedure is defined as:
+
+```
+SIMULATE(M, T):
+  for t = 0 to T − 1:
+    π ← random_permutation(V)
+    for each v in π:
+      j ← uniform_random(N(v))
+      (S(v), S(j)) ← Φ(S(v), S(j))
+      S(v) ← Ψ(v, t)
+```
+
+**Definition 5** (Critical Point). The critical time *t*_c is defined as:
+
+> *t*_c = min{*t* : |{*v* ∈ *V* : *act*_v = 1}| > |{*v* ∈ *V* : *act*_v = 0}|}, if such *t* exists; *t*_c = 0 otherwise.
+
+---
+
+## 3. Network Construction
+
+### 3.1 Scale-Free Network via Preferential Attachment
+
+**Algorithm.** The scale-free network is constructed using a variant of the Barabási–Albert preferential attachment model (Barabási & Albert, 1999). Starting from two connected seed nodes, each subsequent node is attached to an existing node selected via roulette wheel selection proportional to degree. After all *N* nodes are placed, each node receives three additional edges via the same preferential attachment mechanism.
+
+**Implementation reference:** `setup_scale_free_network()` (line 522–585).
+
+#### 3.1.1 Time Complexity
+
+| Phase | Operation | Complexity |
+|-------|-----------|------------|
+| Seed initialization | `add_node`, `add_edge` (2 nodes) | O(1) |
+| Incremental attachment | *N* − 2 calls to `_find_partner` + `add_edge` | O(∑_{i=2}^{N-1} i) = **O(N²)** |
+| Additional edge augmentation | 3*N* calls to `_add_link`, each with `_find_partner` | **O(N²)** |
+| Position assignment | `_set_pos_xy_of_nodes`: iterate over *N* nodes | O(N) |
+
+**Subroutine: `_find_partner()`** (line 587–636). Performs roulette wheel selection by scanning the cumulative degree sequence until exceeding a uniformly random threshold. Worst-case: **O(N)**; expected: O(N/2).
+
+**Subroutine: `_add_link()`** (line 638–688). Repeatedly invokes `_find_partner()` until a valid (non-duplicate, non-self-loop) edge is found. Edge existence is checked in O(1) via the NetworkX adjacency dictionary. Because the network is sparse, the expected number of retries is O(1), yielding an amortized cost of **O(N)** per call. Worst-case: O(N²) per call.
+
+**Total SFN construction time: O(N²).**
+
+#### 3.1.2 Space Complexity
+
+- Degree list for roulette selection: O(N)
+- NetworkX `Graph` object (adjacency list representation): O(N + E), where E ~ 4N
+- **Total: O(N + E) = O(N)**, since E = O(N) for bounded average degree
+
+### 3.2 Small-World Network via Watts–Strogatz Model
+
+**Algorithm.** The small-world network follows the Watts–Strogatz construction (Watts & Strogatz, 1998). A *W* × *W* two-dimensional torus lattice is created with Moore neighborhood (8-connected) edges. Each edge is then rewired with probability *p*: one endpoint is reconnected to a uniformly random non-neighbor.
+
+**Implementation reference:** `setup_small_world_network()` (line 726–827).
+
+#### 3.2.1 Time Complexity
+
+| Phase | Operation | Complexity |
+|-------|-----------|------------|
+| Node creation | *N* calls to `add_node` | O(N) |
+| Moore neighborhood edges | 8 directions per node, `has_edge` in O(1) | O(8N) = **O(N)** |
+| Edge rewiring | Iterate over *E* edges, rewire with probability *p* | See below |
+| Position assignment | O(N) | O(N) |
+
+**Rewiring analysis** (line 796–819). For each edge selected for rewiring (expected: *p* · *E*), the algorithm constructs a candidate list of non-neighbors:
+
 ```python
 non_neighbors = [n for n in G.nodes() if n != node1 and not G.has_edge(node1, n)]
 ```
-- 對每條被選中重連的邊 (期望 p*E 條)，掃描所有 N 節點
-- **O(p * E * N)**
-- 因 E = O(N) (Moore 鄰域產生 ~4N 條無向邊)，故為 **O(p * N^2)**
-- 最壞情況 (p = 1): **O(N^2)**
 
-**SWN 建構總時間: O(N^2)** (最壞)；**O(pN^2)** (期望)
+This scan costs O(N) per rewired edge. The total rewiring cost is therefore O(*p* · *E* · *N*). Since *E* = O(N) for the Moore lattice (~4*N* undirected edges), this simplifies to **O(*p* · N²)**. In the worst case (*p* = 1): **O(N²)**.
 
-**空間複雜度:**
-- `edges_to_process` 快照: O(E)
-- `non_neighbors` 臨時列表: O(N) (每次重連建立一次)
-- networkx Graph: O(N + E)
-- **空間: O(N + E) = O(N)**
+**Total SWN construction time: O(N²)** (worst case); **O(pN²)** (expected).
 
----
+#### 3.2.2 Space Complexity
 
-## 2. 智能體初始化 `setup_agent_population()` (line 832-894)
-
-**演算法定義:**
-> 為每個節點從常態分佈 N(mu, sigma) 抽樣態度值 att 和門檻值 theta，並 clamp 至 [1, 100]。選出 P 個先驅者設為已採用狀態。
-
-**時間複雜度:**
-
-| 操作 | 複雜度 |
-|------|--------|
-| NumPy `np.random.normal` + `np.clip` (向量化) | O(N) |
-| 建立 `_states` 陣列 (Nx4) | O(N) |
-| `_chosen_leaders()` | O(N log N) (clustered=True 時排序) 或 O(N) (隨機選取) |
-| 設定先驅者屬性 | O(P) |
-
-**`_chosen_leaders()`** (line 896-929):
-- `clustered_pioneers=True`: `sorted(nodes, key=...)` -> **O(N log N)**
-- `clustered_pioneers=False`: `random.sample(list(G.nodes()), n)` -> **O(N)**
-
-**初始化總時間: O(N log N)** (受排序主導)
-
-**空間複雜度:**
-- `_states` NumPy 陣列 (Nx4): O(N)
-- `att_arr`, `theta_arr` 臨時陣列: O(N)
-- **空間: O(N)**
+- Snapshot of edges for processing: O(E)
+- Temporary `non_neighbors` list: O(N) per rewiring operation
+- NetworkX `Graph` object: O(N + E)
+- **Total: O(N + E) = O(N)**
 
 ---
 
-## 3. 鄰居快取建構 `_build_neighbors_cache()` (line 429-441)
+## 4. Agent Initialization
 
-**演算法定義:**
-> 對網絡中每個節點，預先計算其鄰居列表並存入字典。
+**Algorithm.** Each node *v* is assigned an attitude value *att*_v and a threshold *θ*_v sampled from a normal distribution 𝒩(μ, σ) and clamped to [1, 100]. A set of *P* pioneer agents is selected and initialized to the adopted state.
 
-**時間複雜度:**
-- 遍歷 N 節點，每個節點取鄰居列表
-- `list(G.neighbors(n))` 的時間 = O(degree(n))
-- 總計: sum_i degree(i) = 2E
-- **O(N + E)** = O(N) (因 E = O(N))
+**Implementation reference:** `setup_agent_population()` (line 832–894).
 
-**空間複雜度:**
-- 字典含 N 個條目，每條目為鄰居列表
-- 總空間 = sum_i degree(i) = 2E
-- **O(N + E)** = O(N)
+### 4.1 Time Complexity
+
+| Operation | Complexity |
+|-----------|------------|
+| Vectorized sampling via `np.random.normal` + `np.clip` | O(N) |
+| State array construction (*N* × 4 matrix) | O(N) |
+| Pioneer selection via `_chosen_leaders()` | O(N log N) or O(N) |
+| Pioneer attribute assignment | O(P) |
+
+**Subroutine: `_chosen_leaders()`** (line 896–929). When `clustered_pioneers=True`, nodes are sorted by a spatial clustering criterion, requiring O(N log N). When `clustered_pioneers=False`, `random.sample` is used in O(N).
+
+**Total initialization time: O(N log N)**, dominated by the sorting step.
+
+### 4.2 Space Complexity
+
+- State array `_states` (N × 4, float64): O(N)
+- Temporary sampling arrays: O(N)
+- **Total: O(N)**
 
 ---
 
-## 4. 模擬主迴圈
+## 5. Neighbor Cache Construction
 
-### 4.1 單步執行 `_step_all_agents()` (line 1092-1228)
+**Algorithm.** For each node *v* ∈ *V*, the neighbor list is precomputed and stored in a dictionary for O(1) lookup during simulation.
 
-**演算法定義:**
-> **BCAT 核心模擬步驟。** 將所有 N 節點隨機排列 (Fisher-Yates shuffle)，依序對每個節點執行:
-> 1. **意見交流 (Bounded Confidence):** 隨機選一鄰居，若態度差 < bounded_confidence，則依雙方採用狀態套用 opinion update rule (雙向/單向趨同)
-> 2. **採納決策 (Threshold Model):** 若未採用、態度 > 50、且鄰居採用比例 >= 個人門檻比例，則採納
+**Implementation reference:** `_build_neighbors_cache()` (line 429–441).
 
-**時間複雜度 (每步):**
+### 5.1 Time Complexity
 
-| 操作 | 每節點 | 全部 N 節點 |
-|------|--------|-------------|
-| `np.arange(N)` + `np.random.shuffle` | - | O(N) |
-| `np.random.random(N)` (預生成隨機數) | - | O(N) |
-| 存取快取鄰居 `neighbors_cache[node]` | O(1) | O(N) |
-| 選擇隨機鄰居 | O(1) | O(N) |
-| 讀取/寫入 `states[node, col]` | O(1) | O(N) |
-| 意見更新 (opinion rule) | O(1) | O(N) |
-| **採納決策 -- 計算鄰居採用比例** | **O(d(i))** | **O(sum d(i)) = O(E)** |
+Iterating over all *N* nodes and collecting each node's adjacency list requires O(*d*(*v*)) per node. The total cost is:
 
-**採納決策的嚴格分析 (line 1214-1228):**
+> ∑_{v ∈ V} d(v) = 2E
+
+**Total: O(N + E) = O(N)** for bounded average degree.
+
+### 5.2 Space Complexity
+
+The dictionary stores *N* entries with a combined size of ∑_v d(v) = 2*E*.
+
+**Total: O(N + E) = O(N).**
+
+---
+
+## 6. Core Simulation Loop
+
+### 6.1 Single Time Step
+
+**Algorithm.** The core simulation step (`_step_all_agents`, line 1092–1228) applies a random-order asynchronous update. All *N* nodes are randomly permuted (Fisher–Yates shuffle). For each node in the permuted order: (i) a neighbor is selected uniformly at random; (ii) the bounded confidence opinion update rule Φ is applied; (iii) the threshold adoption decision Ψ is evaluated.
+
+#### 6.1.1 Time Complexity per Step
+
+| Operation | Per Node | Over All *N* Nodes |
+|-----------|----------|-------------------|
+| Array creation + Fisher–Yates shuffle | — | O(N) |
+| Random number pre-generation | — | O(N) |
+| Neighbor cache lookup | O(1) | O(N) |
+| Random neighbor selection | O(1) | O(N) |
+| State array read/write | O(1) | O(N) |
+| Opinion update (Φ) | O(1) | O(N) |
+| **Adoption decision (Ψ) — neighbor scan** | **O(d(v))** | **O(∑_v d(v)) = O(2E)** |
+
+The adoption decision (line 1214–1228) iterates over all neighbors to compute the fraction of adopters:
+
 ```python
 for nb in neighbors:
     if states[nb, ACT] != 0.0:
         adopter_count += 1
 ```
-- 遍歷每個鄰居檢查採用狀態: O(degree(node))
-- 所有節點的總計: sum_i degree(i) = 2E
 
-**單步時間: O(N + E)**
+This requires O(d(v)) per node, summing to O(2E) over all nodes.
 
-> 在預設參數下 E = O(N) (K ~ 8-10 為常數)，故實際為 **O(N)**。
-> 嚴格表達: **O(N + E)** 其中 E 為邊數。
+**Single step time complexity: O(N + E).**
 
-**空間複雜度 (每步):**
-- `nodes` 陣列: O(N)
-- `rand_vals` 陣列: O(N)
-- 本地變數: O(1)
-- **空間: O(N)**
+> **Remark.** Under the default parameters where *K* is a constant (K ~ 8–10), we have *E* = O(*N*), and thus each step runs in **O(N)**.
 
----
+#### 6.1.2 Space Complexity per Step
 
-### 4.2 完整模擬 `go()` (line 934-1034)
+- Permutation array: O(N)
+- Pre-generated random values: O(N)
+- Local variables: O(1)
+- **Total: O(N)**
 
-**演算法定義:**
-> 執行 `setup()` 初始化，然後重複 T 步 `_step_all_agents()`，每步記錄統計數據。
+### 6.2 Complete Simulation Run
 
-**時間複雜度:**
+**Algorithm.** The `go()` method (line 934–1034) invokes `setup()` for initialization, then executes *T* iterations of `_step_all_agents()`, recording per-step statistics (adopter count, mean attitude, standard deviation, critical point).
 
-| 階段 | 複雜度 |
-|------|--------|
-| `setup()` = 網絡建構 + 快取 + 初始化 | O(N^2) + O(N+E) + O(N log N) = **O(N^2)** |
-| T 步 `_step_all_agents()` | **O(T * (N + E))** |
-| 每步的統計 (`np.sum`, `np.mean`, `np.std`) | O(N) per step -> O(TN) |
-| 每步的 `critical_point` | O(N) per step -> O(TN) |
-| 每步的態度快照記錄 | O(N) per step -> O(TN) |
+#### 6.2.1 Time Complexity
 
-**`critical_point` property** (line 1456-1490):
-- `np.sum(self._states[:, self._ACT])`: O(N)
-- 一旦設定後短路: O(1)
-- 攤銷: O(N) (前 T_c 步各 O(N)，之後各 O(1))
+| Component | Complexity |
+|-----------|------------|
+| `setup()` = network construction + cache + agent init | O(N²) + O(N + E) + O(N log N) = **O(N²)** |
+| *T* iterations of `_step_all_agents()` | **O(T · (N + E))** |
+| Per-step statistics (`np.sum`, `np.mean`, `np.std`) | O(N) per step → O(TN) total |
+| Critical point evaluation | O(N) per step (amortized: O(1) after reaching *t*_c) |
+| Attitude snapshot recording | O(N) per step → O(TN) total |
 
-**go() 總時間: O(N^2 + T(N + E))**
+**`critical_point` property** (line 1456–1490): Computes `np.sum(states[:, ACT])` in O(N). Once the critical point is identified, subsequent calls short-circuit in O(1).
 
-> 當 T*E/N > N 時 (通常成立: 300*8 = 2400 > 400)，
-> **主導項為 O(T(N + E))**
+**Total time for `go()`: O(N² + T(N + E)).**
 
----
+> **Remark.** Under typical parameters (T · K = 300 × 8 = 2,400 > N = 400), the simulation loop dominates: **O(T(N + E))**.
 
-### 4.3 互動模式 `step()` (line 1036-1090)
+#### 6.2.2 Space Complexity
 
-**時間複雜度 (每次呼叫):**
+| Component | Complexity | Description |
+|-----------|------------|-------------|
+| NetworkX `Graph` | O(N + E) | Adjacency list representation |
+| State array `_states` | O(N) | N × 4 float64 matrix |
+| Neighbor cache | O(N + E) | Precomputed adjacency lists |
+| Attitude snapshot history | O(TU) | U ≤ 100 distinct values |
+| Adopter history list | O(T) | One entry per step |
+| Temporary arrays per step | O(N) | Shuffle, random values |
 
-| 操作 | 複雜度 |
-|------|--------|
-| `_step_all_agents()` | O(N + E) |
-| `np.sum` 計算採用者 | O(N) |
-| 態度快照建構 | O(N) |
-| 新採用者統計 | O(N) |
-| `critical_point` | O(N) |
+**Total space for a single run: O(N + E + T).**
 
-**step() 單次呼叫: O(N + E)**
+> Since *E* = O(*N*) and *TU* = O(*T*) (with *U* ≤ 100 as a constant), this simplifies to **O(N + T)**.
+
+### 6.3 Interactive Mode
+
+The `step()` method (line 1036–1090) executes a single time step with statistics collection.
+
+**Time per invocation: O(N + E).** Space: O(N).
 
 ---
 
-## 5. 批量實驗 `run_experiments()` (line 1495-1580)
+## 7. Batch Experimentation
 
-**演算法定義:**
-> 重複執行 X 次完整模擬 `go()`，每次模擬包含 setup + T 步迴圈。
-> 將每次實驗的結果寫入檔案，最後輸出彙總統計。
+**Algorithm.** The `run_experiments()` method (line 1495–1580) executes *X* independent replications of the complete simulation. Each replication reinitializes the network and agent population via `setup()`, runs *T* time steps, serializes the model state, and writes per-experiment results to disk. A summary file with aggregated statistics is produced upon completion.
 
-**時間複雜度:**
+### 7.1 Time Complexity
 
-| 操作 | 複雜度 |
-|------|--------|
-| X 次 `go()` | X * O(N^2 + T(N+E)) = **O(X * (N^2 + T(N+E)))** |
-| 每次 `save_model_state()` - pickle 序列化 | O(N + E) per exp = O(X(N+E)) |
-| 每次寫入實驗文件 | O(T) per exp = O(XT) |
-| `adopter_list` 四捨五入 | O(T) |
-| 寫入總結文件 | O(T + X) |
+| Operation | Complexity |
+|-----------|------------|
+| *X* invocations of `go()` | X · O(N² + T(N + E)) |
+| State serialization per experiment (`save_model_state`) | O(N + E) per experiment |
+| File I/O per experiment | O(T) per experiment |
+| Adopter list rounding | O(T) |
+| Summary file output | O(T + X) |
 
-**run_experiments() 總時間: O(X * (N^2 + T(N + E)))**
+**Total: O(X · (N² + T(N + E))).**
 
-> 簡化: 因 T(N+E) >> N^2 在典型參數下，
-> **O(XT(N + E))**
+> Under typical parameters where T(N + E) ≫ N², this simplifies to **O(X · T · (N + E))**.
 
-**空間複雜度:**
-- 每次實驗的 `results` 列表: O(T)
-- `adopter_list`: O(T)
-- `critical_time_list`: O(X)
-- 模型本身: O(N + E)
-- 每次實驗的態度快照: O(T * U)，U 為不同整數態度值數量 (U <= 100)
-- **空間: O(N + E + TU + X)**
+### 7.2 Space Complexity
+
+- Per-experiment results list: O(T)
+- Aggregated adopter list: O(T)
+- Critical time list: O(X)
+- Model state: O(N + E)
+- Per-experiment attitude snapshots: O(T · U), where U ≤ 100
+
+**Total: O(N + E + TU + X).** Each experiment reuses the same memory (cleared by `setup()`), accumulating only O(X) for `critical_time_list` and O(T) for `adopter_list`.
 
 ---
 
-## 6. 資料持久化
+## 8. Data Persistence
 
-### 6.1 `save_model_state()` (line 1585-1627)
+### 8.1 State Serialization
 
-**時間複雜度:**
-- 建構 `node_states_dict`: O(N)
-- pickle 序列化 Graph: O(N + E)
-- pickle 序列化 `attitude_snapshots`: O(TU)
-- **O(N + E + TU)**
+**Implementation reference:** `save_model_state()` (line 1585–1627).
 
-**空間複雜度:**
-- `node_states_dict`: O(N)
-- `data` 字典: O(N + E + TU)
-- **O(N + E + TU)**
+| Operation | Complexity |
+|-----------|------------|
+| Construct `node_states_dict` | O(N) |
+| Pickle-serialize graph | O(N + E) |
+| Pickle-serialize attitude snapshots | O(TU) |
+| **Total** | **O(N + E + TU)** |
 
-### 6.2 `load_model_state()` (line 1629-1696)
+**Space: O(N + E + TU).**
 
-**時間複雜度:**
-- pickle 反序列化: O(N + E + TU)
-- `node_states` setter (dict -> NumPy): O(N)
-- `_build_neighbors_cache()`: O(N + E)
-- `_reconstruct_adoption_history()`: O(TN)
+### 8.2 State Deserialization
 
-**`_reconstruct_adoption_history()`** (line 1698-1724):
+**Implementation reference:** `load_model_state()` (line 1629–1696).
+
+| Operation | Complexity |
+|-----------|------------|
+| Pickle-deserialize | O(N + E + TU) |
+| Reconstruct state array (dict → NumPy) | O(N) |
+| Rebuild neighbor cache | O(N + E) |
+| Reconstruct adoption history | O(TN) |
+
+**Subroutine: `_reconstruct_adoption_history()`** (line 1698–1724). For each of *T* time steps, performs O(N) element-wise comparisons on the adoption time column:
+
 ```python
-for t in range(current_time):          # T iterations
-    np.sum(time_col == t)              # O(N) each
-    np.sum((time_col >= 0) & (...))    # O(N) each
+for t in range(current_time):
+    np.sum(time_col == t)               # O(N)
+    np.sum((time_col >= 0) & (...))     # O(N)
 ```
-- **O(TN)**
 
-**load_model_state() 總時間: O(TN + E)**
+**Total deserialization time: O(TN + E).** Space: O(N + E + TU).
 
 ---
 
-## 7. 視覺化 (ModelVisualizer)
+## 9. Visualization
 
-### 7.1 `plot_network()` (line 1836-1900)
+The `ModelVisualizer` class provides real-time rendering of simulation dynamics via matplotlib. Each visualization routine is analyzed below.
 
-| 操作 | 複雜度 |
-|------|--------|
-| `nx.get_node_attributes` | O(N) |
-| 建構 `node_colors` 列表 | O(N) |
-| `nx.draw_networkx_edges` | O(E) |
-| `nx.draw_networkx_nodes` | O(N) |
-| **總計** | **O(N + E)** |
+### 9.1 Network Visualization
 
-**空間:** O(N + E) (顏色列表 + matplotlib 內部物件)
+**`plot_network()`** (line 1836–1900).
 
-### 7.2 `plot_attitude_trajectory()` (line 1921-1976)
+| Operation | Complexity |
+|-----------|------------|
+| Retrieve node attributes | O(N) |
+| Construct color map | O(N) |
+| Draw edges (`nx.draw_networkx_edges`) | O(E) |
+| Draw nodes (`nx.draw_networkx_nodes`) | O(N) |
+| **Total** | **O(N + E)** |
 
-**增量繪圖:**
-- 只繪製新增時間步: O(U) per new tick，U = 不同態度值數 (<= 100)
-- 整個模擬累計: O(TU)
-- **每次呼叫: O(dt * U)**，dt = 自上次繪圖以來新增的步數
+### 9.2 Attitude Trajectory Plot
 
-### 7.3 `plot_adoption_dynamics()` (line 1978-2027)
+**`plot_attitude_trajectory()`** (line 1921–1976). Uses incremental rendering: only newly added time steps are plotted, at a cost of O(U) per new tick. Over the entire simulation: O(TU). **Per invocation: O(Δt · U)**, where Δt is the number of new steps since the last update.
 
-- `Line2D.set_data()`: O(T) (傳遞整個時間序列)
-- **O(T)**
+### 9.3 Adoption Dynamics Plot
 
-### 7.4 `plot_new_adopter_dynamics()` (line 2029-2072)
+**`plot_adoption_dynamics()`** (line 1978–2027). Updates the full time series via `Line2D.set_data()`. **Time: O(T).**
 
-- 同上: **O(T)**
+### 9.4 New Adopter Dynamics Plot
 
-### 7.5 `plot_attitude_distribution()` (line 2074-2101)
+**`plot_new_adopter_dynamics()`** (line 2029–2072). Analogous to adoption dynamics. **Time: O(T).**
 
-- 直接使用 NumPy 切片 -> matplotlib `hist()`
-- **O(N + B)**，B = bins 數 ~ 100
+### 9.5 Attitude Distribution Histogram
 
-### 7.6 `plot_threshold_distribution()` (line 2103-2129)
+**`plot_attitude_distribution()`** (line 2074–2101). Computes a histogram from the NumPy state array. **Time: O(N + B)**, where B ~ 100 is the number of bins.
 
-- 同上: **O(N + B)**
+### 9.6 Threshold Distribution Histogram
 
-### 7.7 `plot_degree_distribution()` (line 2131-2194)
+**`plot_threshold_distribution()`** (line 2103–2129). Analogous to attitude distribution. **Time: O(N + B).**
 
-**SFN 模式:**
-```python
-degrees = [G.degree(n) for n in G.nodes()]  # O(N)
-for d in range(1, max_degree + 1):          # O(D_max)
-    count = degrees.count(d)                # O(N) each
-```
-- **O(N * D_max)**
-- D_max 在 SFN 中可達 ~60，故 ~ O(60N)
+### 9.7 Degree Distribution Plot
 
-**SWN 模式:**
-- `hist()`: **O(N)**
+**`plot_degree_distribution()`** (line 2131–2194).
 
-### 7.8 `update_plots()` (line 2196-2221)
+- **SFN mode:** Iterates over degrees 1 to *D*_max, calling `list.count(d)` (O(N) each):
 
-- 呼叫上述所有繪圖: **O(N + E + TU + N*D_max)**
-- 簡化: **O(N * D_max + TU)** ~ **O(N * D_max + T)**
+  ```python
+  for d in range(1, max_degree + 1):
+      count = degrees.count(d)           # O(N) each
+  ```
+
+  **Time: O(N · D_max).** With *D*_max ~ 60 in SFN, this is approximately O(60N).
+
+- **SWN mode:** Uses `matplotlib.hist()`. **Time: O(N).**
+
+### 9.8 Composite Update
+
+**`update_plots()`** (line 2196–2221). Invokes all visualization routines. **Total: O(N · D_max + TU)**, which simplifies to **O(N · D_max + T)** since U is bounded.
 
 ---
 
-## 8. 整體模擬程式的複雜度總結
+## 10. Aggregate Complexity Summary
 
-### 定義: 單次完整模擬 (Single Simulation Run)
+### 10.1 Single Simulation Run
 
-**演算法偽碼:**
+**Pseudocode:**
+
 ```
 SINGLE_RUN(N, T, K):
-  1. BUILD_NETWORK(N)           // SFN or SWN
+  1. BUILD_NETWORK(N)              // SFN or SWN
   2. BUILD_NEIGHBOR_CACHE(N)
-  3. INIT_AGENTS(N)
-  4. FOR t = 0 TO T-1:
-       STEP(N, K)               // opinion update + adoption decision
-  5. RETURN results
+  3. INITIALIZE_AGENTS(N)
+  4. for t = 0 to T − 1:
+       STEP_ALL_AGENTS(N, K)       // opinion update + adoption decision
+  5. return results
 ```
 
-#### 時間複雜度
+#### Time Complexity
 
-| 成分 | 複雜度 | 說明 |
-|------|--------|------|
-| 網絡建構 | O(N^2) | 優先附著或重連 |
-| 快取建構 | O(N + E) | 一次性 |
-| 智能體初始化 | O(N log N) | 排序選先驅者 |
-| T 步模擬主迴圈 | O(T(N + E)) | 每步每節點掃描鄰居 |
-| 統計與記錄 | O(TN) | 被主迴圈包含 |
+| Component | Complexity | Description |
+|-----------|------------|-------------|
+| Network construction | O(N²) | Preferential attachment or lattice rewiring |
+| Neighbor cache | O(N + E) | One-time precomputation |
+| Agent initialization | O(N log N) | Pioneer selection with sorting |
+| *T*-step simulation loop | O(T(N + E)) | Per-step neighbor scan for adoption |
+| Per-step statistics | O(TN) | Subsumed by simulation loop |
 
-**單次模擬總時間:**
+**Total:**
 
-```
-T_single(N, T, E) = O(N^2 + T(N + E))
-```
+> **T**_single(*N*, *T*, *E*) = **O(N² + T(N + E))**
 
-> 因 E = O(N) 在 BCAT 預設網絡中 (K 為常數)，簡化為 **O(N^2 + TN)**。
-> 在典型參數下 TK = 300*8 = 2400 > N = 400，故 T(N+E) > N^2，
-> 主導項為 **O(T(N + E))**。
+For sparse networks with bounded average degree *K*, E = O(N):
 
-#### 空間複雜度
+> **T**_single = **O(N² + TN)**
 
-| 成分 | 複雜度 | 說明 |
-|------|--------|------|
-| networkx Graph | O(N + E) | 鄰接表示法 |
-| `_states` 陣列 | O(N) | Nx4 float64 |
-| `_neighbors_cache` | O(N + E) | 預計算鄰居列表 |
-| 態度快照歷史 | O(TU) | U <= 100 |
-| 採用者歷史列表 | O(T) | 每步一筆 |
-| 臨時陣列 (per step) | O(N) | shuffle, rand_vals |
+Under typical parameters (*TK* = 300 × 8 = 2,400 > *N* = 400), the simulation loop dominates:
 
-**單次模擬總空間:**
+> **T**_single = **O(T(N + E))** = **O(TN)** (for constant *K*)
 
-```
-S_single(N, E, T) = O(N + E + T)
-```
+#### Space Complexity
 
-> 因 E = O(N) 且 TU = O(T) (U <= 100 為常數)，
-> 簡化為 **O(N + T)**。
+> **S**_single(*N*, *E*, *T*) = **O(N + E + T)** = **O(N + T)** (for constant *K*)
 
----
+### 10.2 Batch Experiments
 
-### 定義: 批量實驗 (Batch Experiments)
+**Pseudocode:**
 
-**演算法偽碼:**
 ```
 BATCH_RUN(N, T, E, X):
-  FOR exp = 1 TO X:
+  for exp = 1 to X:
     SINGLE_RUN(N, T, E)
     SAVE_STATE()
   WRITE_SUMMARY()
 ```
 
-#### 時間複雜度
+#### Time Complexity
+
+> **T**_batch(*N*, *T*, *E*, *X*) = **O(X · (N² + T(N + E)))**
+
+Simplified (dominant term):
+
+> **T**_batch = **O(X · T · (N + E))**
+
+#### Space Complexity
+
+> **S**_batch = **O(N + E + T + X)**
+
+Each experiment reuses the same memory allocation (cleared by `setup()`).
+
+### 10.3 GUI-Enabled Simulation
+
+**Pseudocode:**
 
 ```
-T_batch(N, T, E, X) = O(X * (N^2 + T(N + E)))
-```
-
-> 簡化: **O(X * T * (N + E))** (主導項)
-
-#### 空間複雜度
-
-```
-S_batch = O(N + E + T + X)
-```
-
-> 每次實驗重用相同記憶體 (`setup()` 會清除)，只累積 `critical_time_list` O(X) 和 `adopter_list` O(T)。
-
----
-
-### 定義: 帶 GUI 的單次模擬
-
-**演算法偽碼:**
-```
-GUI_RUN(N, T, E):
+GUI_RUN(N, T, E, Δt):
   SINGLE_RUN(N, T, E)
-  FOR each GUI update (every dt steps):
-    UPDATE_PLOTS()                // O(N*D_max + T)
+  for each GUI refresh (every Δt steps):
+    UPDATE_PLOTS()                      // O(N · D_max + T)
 ```
 
-假設 GUI 每 dt 步更新一次，共更新 T/dt 次:
+Assuming *T*/Δ*t* visualization refreshes:
 
-```
-T_gui = O(N^2 + T(N+E) + (T/dt) * (N*D_max + T))
-```
+> **T**_gui = O(N² + T(N + E) + (T/Δt) · (N · D_max + T))
 
-> 在實務中，繪圖的 overhead 遠大於模擬邏輯的數值計算，
-> 但 dt 通常會隨模擬加速而增大，使繪圖總次數可控。
+In practice, the rendering overhead substantially exceeds the numerical computation cost; however, Δ*t* typically increases with simulation speed, keeping the total number of refreshes manageable.
 
 ---
 
-## 9. 以預設參數代入的具體數值分析
+## 11. Empirical Parameterization
 
-取 N=400, T=300, E~1600(SWN)/~2000(SFN), X=20, D_max~60, U<=100:
+Substituting the default parameter values (N = 400, T = 300, E ~ 1,600–2,000, X = 20, D_max ~ 60, U ≤ 100):
 
-| 操作 | 表達式 | 數量級 |
-|------|--------|--------|
-| SFN 建構 | N^2 = 160,000 | ~10^5 |
-| 單步模擬 | N + E ~ 2,400 | ~10^3 |
-| 完整模擬 | T(N+E) ~ 720,000 | ~10^6 |
-| 批量實驗 | XT(N+E) ~ 14,400,000 | ~10^7 |
-| 空間 (單次) | N + E + T ~ 2,700 | ~10^3 |
+| Operation | Expression | Order of Magnitude |
+|-----------|-----------|-------------------|
+| SFN construction | N² = 160,000 | ~10⁵ |
+| Single simulation step | N + E ~ 2,400 | ~10³ |
+| Complete simulation | T(N + E) ~ 720,000 | ~10⁶ |
+| Batch experiments | XT(N + E) ~ 14,400,000 | ~10⁷ |
+| Space (single run) | N + E + T ~ 2,700 | ~10³ |
+
+These figures confirm that even batch experimentation with 20 replications remains computationally tractable (order 10⁷ elementary operations), well within the capacity of commodity hardware.
 
 ---
 
-## 10. 各函式複雜度速查表
+## 12. Per-Function Complexity Reference
 
-| 函式 | 行號 | 時間複雜度 | 空間複雜度 |
-|------|------|------------|------------|
+| Function | Line | Time Complexity | Space Complexity |
+|----------|------|----------------|-----------------|
 | `_nl_round(x)` | 145 | O(1) | O(1) |
 | `_NodeStateView.__getitem__` | 207 | O(1) | O(1) |
 | `_NodeStatesProxy.__getitem__` | 244 | O(1) | O(1) |
-| `_NodeStatesProxy.items()` | 256 | O(N) | O(1) [1] |
-| `setup()` | 446 | O(N^2) | O(N+E) |
-| `_clear()` | 469 | O(1) [2] | - |
-| `setup_scale_free_network()` | 522 | O(N^2) | O(N+E) |
+| `_NodeStatesProxy.items()` | 256 | O(N) | O(1) [a] |
+| `setup()` | 446 | O(N²) | O(N + E) |
+| `_clear()` | 469 | O(1) [b] | — |
+| `setup_scale_free_network()` | 522 | O(N²) | O(N + E) |
 | `_find_partner()` | 587 | O(N) | O(1) |
 | `_add_link()` | 638 | O(N) amortized | O(1) |
 | `_set_pos_xy_of_nodes()` | 690 | O(N) | O(N) |
-| `setup_small_world_network()` | 726 | O(N^2) worst; O(pN^2) expected | O(N+E) |
+| `setup_small_world_network()` | 726 | O(N²) worst; O(pN²) expected | O(N + E) |
 | `setup_agent_population()` | 832 | O(N log N) | O(N) |
 | `_chosen_leaders()` | 896 | O(N log N) | O(N) |
-| `_build_neighbors_cache()` | 429 | O(N+E) | O(N+E) |
-| `go()` | 934 | O(N^2 + T(N+E)) | O(N+E+T) |
-| `step()` | 1036 | O(N+E) | O(N) |
-| `_step_all_agents()` | 1092 | O(N+E) | O(N) |
+| `_build_neighbors_cache()` | 429 | O(N + E) | O(N + E) |
+| `go()` | 934 | O(N² + T(N + E)) | O(N + E + T) |
+| `step()` | 1036 | O(N + E) | O(N) |
+| `_step_all_agents()` | 1092 | O(N + E) | O(N) |
 | `_communicate()` | 1267 | O(1) | O(1) |
-| `_change_opinion_{1,2,3}()` | 1345-1382 | O(1) | O(1) |
-| `_make_decision()` | 1387 | O(d(i)) | O(1) |
+| `_change_opinion_{1,2,3}()` | 1345–1382 | O(1) | O(1) |
+| `_make_decision()` | 1387 | O(d(v)) | O(1) |
 | `_become_action()` | 1427 | O(1) | O(1) |
-| `critical_point` (property) | 1455 | O(N) [3] | O(1) |
-| `run_experiments()` | 1495 | O(X(N^2+T(N+E))) | O(N+E+T+X) |
-| `save_model_state()` | 1585 | O(N+E+TU) | O(N+E+TU) |
-| `load_model_state()` | 1629 | O(TN+E) | O(N+E+TU) |
+| `critical_point` (property) | 1455 | O(N) [c] | O(1) |
+| `run_experiments()` | 1495 | O(X(N² + T(N + E))) | O(N + E + T + X) |
+| `save_model_state()` | 1585 | O(N + E + TU) | O(N + E + TU) |
+| `load_model_state()` | 1629 | O(TN + E) | O(N + E + TU) |
 | `_reconstruct_adoption_history()` | 1698 | O(TN) | O(T) |
-| `plot_network()` | 1836 | O(N+E) | O(N+E) |
-| `plot_attitude_trajectory()` | 1921 | O(dt*U) incremental | O(1) |
+| `plot_network()` | 1836 | O(N + E) | O(N + E) |
+| `plot_attitude_trajectory()` | 1921 | O(Δt · U) incremental | O(1) |
 | `plot_adoption_dynamics()` | 1978 | O(T) | O(T) |
 | `plot_new_adopter_dynamics()` | 2029 | O(T) | O(T) |
 | `plot_attitude_distribution()` | 2074 | O(N) | O(N) |
 | `plot_threshold_distribution()` | 2103 | O(N) | O(N) |
-| `plot_degree_distribution()` | 2131 | O(N*D_max) SFN; O(N) SWN | O(N) |
-| `update_plots()` | 2196 | O(N*D_max + TU) | O(N+E+T) |
+| `plot_degree_distribution()` | 2131 | O(N · D_max) SFN; O(N) SWN | O(N) |
+| `update_plots()` | 2196 | O(N · D_max + TU) | O(N + E + T) |
 
 **Notes:**
-- [1] generator，不建構完整列表
-- [2] 只是賦值，NumPy/dict 的舊物件由 GC 回收
-- [3] 一旦 critical_time > 0 後短路為 O(1)
+- [a] Returns a generator; does not construct a full list in memory.
+- [b] Performs only reference reassignment; deallocation of the previous NumPy array and dictionary is handled by the garbage collector.
+- [c] Short-circuits to O(1) once the critical time *t*_c has been identified.
 
 ---
 
-## 11. 演算法的嚴謹數學定義
+## 13. Conclusion
 
-### 定義 1: BCAT 模型形式化
+This analysis establishes tight asymptotic bounds for all computational components of the BCAT simulation framework. The key findings are as follows:
 
-**BCAT 模型**是一個五元組 **M = (G, S, Pi, Phi, Psi)**，其中:
+1. **Network construction** constitutes a one-time O(N²) cost for both scale-free and small-world topologies, dominated by preferential attachment partner search (SFN) or edge rewiring with non-neighbor enumeration (SWN).
 
-- **G = (V, E)** 是無向圖，|V| = N, |E| = E
-- **S: V -> [1,100] x [1,100] x {0,1} x (Z union {-1})** 是狀態函數，S(v) = (att_v, theta_v, act_v, time_v)
-- **Pi** 是參數集合 {mu (convergence_rate), beta (bounded_confidence), P (pioneers count), T (max_time)}
-- **Phi: S x S x Pi -> S x S** 是意見更新函數 (Bounded Confidence Opinion Dynamics)
-- **Psi: S x 2^V -> S** 是採納決策函數 (Threshold Adoption)
+2. **The simulation loop** is the dominant computational cost, running in O(T(N + E)) time. For sparse networks with bounded average degree, this reduces to O(TN), yielding linear scaling in both population size and simulation duration.
 
-### 定義 2: 意見更新函數 Phi
+3. **Batch experimentation** scales linearly with the number of replications: O(X · T · (N + E)).
 
-給定節點 i 和隨機選取的鄰居 j in N(i)，若 |att_i - att_j| < beta:
+4. **Space requirements** are modest at O(N + E + T) per simulation run, with no super-linear memory demands.
 
-```
-Phi(S(i), S(j)) = 根據 (act_i, act_j, att_i, att_j) 選取:
-  opinion-1 (雙向): att_i' = floor(att_i + mu*(att_j - att_i) + 0.5)
-                     att_j' = floor(att_j + mu*(att_i - att_j) + 0.5)
-  opinion-2 (僅自身): att_i' = floor(att_i + mu*(att_j - att_i) + 0.5)
-  opinion-3 (僅對象): att_j' = floor(att_j + mu*(att_i - att_j) + 0.5)
-```
+5. **Visualization overhead**, while significant in wall-clock time due to rendering latency, is bounded by O(N · D_max + T) per update and does not affect the asymptotic complexity of the simulation logic itself.
 
-**選擇規則:**
-| act_i | act_j | att_j > att_i | Rule |
-|-------|-------|---------------|------|
-| F | T | T | opinion-2 |
-| F | T | F | opinion-1 |
-| T | F | T | opinion-1 |
-| T | F | F | opinion-3 |
-| T | T | T | opinion-2 |
-| T | T | F | opinion-3 |
-| F | F | * | opinion-1 |
+These results confirm that the BCAT framework is computationally efficient for the parameter ranges typical of innovation diffusion studies (N ≤ 10⁴, T ≤ 10³), and identify network construction as the primary bottleneck for scaling to larger populations.
 
-### 定義 3: 採納決策函數 Psi
+---
 
-```
-Psi(i, t) = {
-  act_i <- 1, time_i <- t   if act_i = 0
-                              AND att_i > 50
-                              AND |N(i)| > 0
-                              AND |{j in N(i) : act_j = 1}| / |N(i)| >= theta_i / 100
-  unchanged                  otherwise
-}
-```
+## References
 
-### 定義 4: 模擬迴圈
-
-```
-SIMULATE(M, T):
-  for t = 0 to T-1:
-    pi <- random_permutation(V)
-    for each v in pi:
-      j <- uniform_random(N(v))
-      (S(v), S(j)) <- Phi(S(v), S(j))
-      S(v) <- Psi(v, t)
-```
-
-**每步時間複雜度:** O(sum_{v in V} (1 + d(v))) = O(N + 2E) = **O(N + E)**
-
-### 定義 5: 臨界點
-
-```
-t_critical = min{t : |{v : act_v = 1}| > |{v : act_v = 0}|}, if exists
-           = 0, if not exists
-```
+- Barabási, A.-L., & Albert, R. (1999). Emergence of scaling in random networks. *Science*, 286(5439), 509–512.
+- Deffuant, G., Neau, D., Amblard, F., & Weisbuch, G. (2000). Mixing beliefs among interacting agents. *Advances in Complex Systems*, 3(01n04), 87–98.
+- Granovetter, M. (1978). Threshold models of collective behavior. *American Journal of Sociology*, 83(6), 1420–1443.
+- Hegselmann, R., & Krause, U. (2002). Opinion dynamics and bounded confidence models, analysis, and simulation. *Journal of Artificial Societies and Social Simulation*, 5(3).
+- Rogers, E. M. (2003). *Diffusion of Innovations* (5th ed.). Free Press.
+- Valente, T. W. (1996). Social network thresholds in the diffusion of innovations. *Social Networks*, 18(1), 69–89.
+- Watts, D. J., & Strogatz, S. H. (1998). Collective dynamics of 'small-world' networks. *Nature*, 393(6684), 440–442.
