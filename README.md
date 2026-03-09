@@ -22,18 +22,7 @@ Each simulation consists of 400 agents connected by approximately 1,600 edges, w
 - **Reproducible scenarios** — Pre-configured parameter files for reproducing all key paper figures.
 - **Dual implementation** — Both Python 3 (with GUI) and NetLogo 4.0.5 versions producing statistically equivalent results.
 
-## Repository Contents
-
-| File | Description |
-|------|-------------|
-| `BCAT.py` | Python 3 implementation with GUI (Tkinter + matplotlib) |
-| `English - best game no one played.nlogo` | Original NetLogo 4.0.5 implementation |
-| `test_scenarios/` | Parameter configuration files for reproducing paper results |
-| `requirements.txt` | Python package dependencies |
-| `LICENSE` | MIT License |
-| `CITATION.cff` | Citation metadata |
-
-## Requirements
+## Installation
 
 ### Python Version
 
@@ -61,7 +50,7 @@ pip install numpy>=1.24.0 networkx>=3.0 matplotlib>=3.7.0
 
 - NetLogo 4.0.5 or later (available at https://ccl.northwestern.edu/netlogo/)
 
-## Running the Simulation
+## Usage
 
 ### Python Version
 
@@ -165,6 +154,11 @@ BCAT/
 └── LICENSE                                # MIT License
 ```
 
+## Authors
+
+- **Chung-Yuan Huang** (黃崇源) — Department of Computer Science and Information Engineering, Chang Gung University, Taiwan (gscott@mail.cgu.edu.tw)
+- **Sheng-Wen Wang** (Corresponding author) — Department of Finance and Information, National Kaohsiung University of Science and Technology, Taiwan (swwang@nkust.edu.tw)
+
 ## Citation
 
 If you use this software in your research, please cite:
@@ -172,11 +166,6 @@ If you use this software in your research, please cite:
 > Huang, C.-Y., & Wang, S.-W. (2025). Exploring the "Best Game No One Played" Phenomenon Using A Mixed Opinion Dynamics and Innovation Diffusion Model. *PLOS ONE*. (forthcoming)
 
 See `CITATION.cff` for machine-readable citation metadata.
-
-## Authors
-
-- **Chung-Yuan Huang** (黃崇源) — Department of Computer Science and Information Engineering, Chang Gung University, Taiwan (gscott@mail.cgu.edu.tw)
-- **Sheng-Wen Wang** (Corresponding author) — Department of Finance and Information, National Kaohsiung University of Science and Technology, Taiwan (swwang@nkust.edu.tw)
 
 ## References
 
