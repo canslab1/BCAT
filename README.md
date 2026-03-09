@@ -13,6 +13,15 @@ The BCAT (Bounded Confidence + Adoption Threshold) model integrates a bounded co
 
 Each simulation consists of 400 agents connected by approximately 1,600 edges, with an average of 8 neighbors per agent.
 
+## Features
+
+- **Mixed model** — Integrates bounded confidence opinion dynamics with adoption threshold innovation diffusion in a single simulation.
+- **Four network topologies** — Regular Lattice (CA), Small-World (SWN), Random (RN), and Scale-Free (SFN) networks.
+- **Interactive GUI** — Tkinter-based interface with real-time visualization of attitude trajectories, social networks, adoption dynamics, and distributions.
+- **Batch experiments** — Run multiple repetitions with automatic result aggregation.
+- **Reproducible scenarios** — Pre-configured parameter files for reproducing all key paper figures.
+- **Dual implementation** — Both Python 3 (with GUI) and NetLogo 4.0.5 versions producing statistically equivalent results.
+
 ## Repository Contents
 
 | File | Description |
@@ -139,6 +148,23 @@ The BCAT model operates in the following phases per time step:
 - NetworkX graphs replace NetLogo's native turtle/link network structure.
 - Both versions produce statistically equivalent results under identical random seeds and parameter settings.
 
+## Project Structure
+
+```
+BCAT/
+├── BCAT.py                                # Python 3 implementation with GUI (Tkinter + matplotlib)
+├── English - best game no one played.nlogo # NetLogo 4.0.5 implementation
+├── requirements.txt                       # Python dependencies
+├── CITATION.cff                           # Citation metadata
+├── test_scenarios/                        # Parameter configs for paper reproduction
+│   ├── fig4_favorable_review_good_sales.json
+│   ├── fig5_favorable_review_poor_sales.json
+│   ├── fig10_opinion_dynamics_only.json
+│   ├── fig11_adoption_threshold_only.json
+│   └── sensitivity_analysis_1000_runs.json
+└── LICENSE                                # MIT License
+```
+
 ## Citation
 
 If you use this software in your research, please cite:
@@ -147,6 +173,11 @@ If you use this software in your research, please cite:
 
 See `CITATION.cff` for machine-readable citation metadata.
 
+## Authors
+
+- **Chung-Yuan Huang** (黃崇源) — Department of Computer Science and Information Engineering, Chang Gung University, Taiwan (gscott@mail.cgu.edu.tw)
+- **Sheng-Wen Wang** (Corresponding author) — Department of Finance and Information, National Kaohsiung University of Science and Technology, Taiwan (swwang@nkust.edu.tw)
+
 ## References
 
 1. Wang, S.-W., Huang, C.-Y., & Sun, C.-T. (2022). Multiagent Diffusion and Opinion Dynamics Model Interaction Effects on Controversial Products. *IEEE Access*, 10, 115252–115272. https://doi.org/10.1109/ACCESS.2022.3218719
@@ -154,8 +185,3 @@ See `CITATION.cff` for machine-readable citation metadata.
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Contact
-
-- **Chung-Yuan Huang** -- Department of Computer Science and Information Engineering, Chang Gung University, Taiwan
-- **Sheng-Wen Wang** (Corresponding author) -- Department of Finance and Information, National Kaohsiung University of Science and Technology, Taiwan. Email: swwang@nkust.edu.tw
