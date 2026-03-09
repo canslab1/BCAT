@@ -1,5 +1,8 @@
 # BCAT: Bounded Confidence and Adoption Threshold Model
 
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-green)
+
 A mixed opinion dynamics and innovation diffusion simulation model for exploring the "best game no one played" phenomenon.
 
 ## Overview
