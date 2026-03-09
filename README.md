@@ -172,7 +172,7 @@ See `CITATION.cff` for machine-readable citation metadata.
 
 ## References
 
-1. Wang, S.-W., Huang, C.-Y., & Sun, C.-T. (2022). Multiagent Diffusion and Opinion Dynamics Model Interaction Effects on Controversial Products. *IEEE Access*, 10, 115252–115272. https://doi.org/10.1109/ACCESS.2022.3218719
+1. Wang, S.-W., Huang, C.-Y., & Sun, C.-T. (2022). Multiagent Diffusion and Opinion Dynamics Model Interaction Effects on Controversial Products. *IEEE Access*, 10, 115252–115270. https://doi.org/10.1109/ACCESS.2022.3218719
 
 ## License
 
