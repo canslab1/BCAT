@@ -1535,6 +1535,7 @@ class ModelVisualizer:
         self.fig    = None
         self.axes   = {}
         self.canvas = None
+        self._network_canvas = None  # Social Network 獨立畫布
 
         # 儲存歷史數據 (對應 NetLogo plot 的自動累積功能)
         self.reset_plots()
@@ -1570,10 +1571,8 @@ class ModelVisualizer:
         設定圖形和子圖佈局
 
         對應 NetLogo Interface Tab 的 PLOT 佈局 (已調整):
-          ┌──────────────────────┬──────────────┐
-          │                      │   Social     │
-          │  Attitude trajectory │   Network    │
-          │  (大面積主圖)          │              │
+          ┌─────────────────────────────────────┐
+          │ Attitude trajectory (全寬)           │
           ├───────────┬──────────┬──────────────┤
           │ Attitude  │Threshold │ Node degree  │
           │ dist.     │ dist.    │ dist.        │
@@ -1582,12 +1581,13 @@ class ModelVisualizer:
           ├─────────────────────────────────────┤
           │ New adopter dynamics (全寬)          │
           └─────────────────────────────────────┘
+          (Social Network 圖移至左側控制面板)
 
         Python 使用嵌套 GridSpec 實現佈局:
-          Row 0: attitude_trajectory (60%), network (40%)
+          Row 0: attitude_trajectory (全寬)
           Row 1: attitude_dist, threshold_dist, degree_dist ← 三等分
           Row 2: adoption_dynamics (全寬)
-          Row 3: new_adopter_dynamics (全寬，與 Row 2 等寬等高)
+          Row 3: new_adopter_dynamics (全寬)
         """
         self.fig = Figure(figsize=fig_size, dpi=100)
 
@@ -1595,12 +1595,10 @@ class ModelVisualizer:
         gs = self.fig.add_gridspec(4, 1, hspace=0.4,
                                    height_ratios=[3, 2, 1.5, 1.5])
 
-        # Row 0: 態度軌跡 (60%) + 網絡圖 (40%)
-        gs_row0 = gs[0, 0].subgridspec(1, 2, width_ratios=[3, 2], wspace=0.3)
-        self.axes['attitude_trajectory']  = self.fig.add_subplot(gs_row0[0, 0])
-        self.axes['network']              = self.fig.add_subplot(gs_row0[0, 1])
+        # Row 0: 態度軌跡 (全寬)
+        self.axes['attitude_trajectory']  = self.fig.add_subplot(gs[0, 0])
 
-        # Row 1: 三等分 (原本四等分，移除 new_adopter_dynamics 後空間更寬裕)
+        # Row 1: 三等分
         gs_row1 = gs[1, 0].subgridspec(1, 3, wspace=0.5)
         self.axes['attitude_dist']        = self.fig.add_subplot(gs_row1[0, 0])
         self.axes['threshold_dist']       = self.fig.add_subplot(gs_row1[0, 1])
@@ -1609,10 +1607,22 @@ class ModelVisualizer:
         # Row 2: 採用動態 (全寬)
         self.axes['adoption_dynamics']    = self.fig.add_subplot(gs[2, 0])
 
-        # Row 3: 新採用者動態 (全寬，與 Row 2 等寬等高)
+        # Row 3: 新採用者動態 (全寬)
         self.axes['new_adopter_dynamics'] = self.fig.add_subplot(gs[3, 0])
 
         return self.fig
+
+    def setup_network_figure(self, fig_size=(3, 3)):
+        """
+        設定 Social Network 圖的獨立 Figure (嵌入左側控制面板)
+
+        從主圖表 Figure 分離，使右側圖表區的三張時間序列圖
+        (Attitude Trajectory, Adoption Dynamics, New Adopter Dynamics)
+        共享相同的全寬 X 軸 (Time)。
+        """
+        self._network_fig = Figure(figsize=fig_size, dpi=100)
+        self.axes['network'] = self._network_fig.add_subplot(111)
+        return self._network_fig
 
     def plot_network(self):
         """
@@ -2020,12 +2030,18 @@ class ModelVisualizer:
 
             if self.canvas:
                 self.canvas.draw_idle()
+            if self._network_canvas:
+                self._network_canvas.draw_idle()
         except Exception as e:
             print(f"Plot update error: {e}")
 
     def set_canvas(self, canvas):
         """設定 Tkinter 畫布"""
         self.canvas = canvas
+
+    def set_network_canvas(self, canvas):
+        """設定 Social Network 的 Tkinter 畫布"""
+        self._network_canvas = canvas
 
     def save_attitude_trajectory_hires(self, filename, dpi=300):
         """
@@ -2293,6 +2309,16 @@ class ModelGUI(tk.Tk):
         row = self._add_slider(control_frame, row, "No. of Experiments",
                                'experiments_var', tk.IntVar, self.model.no_of_experiments,
                                10, 1000, 'no_of_experiments')
+
+        # ════════════════════════════════════════
+        # Social Network 圖 (獨立 Figure，嵌入左側面板)
+        # ════════════════════════════════════════
+        network_fig = self.visualizer.setup_network_figure()
+        self._network_canvas = FigureCanvasTkAgg(network_fig, master=control_frame)
+        self._network_canvas.get_tk_widget().grid(
+            row=row, column=0, columnspan=2, sticky=tk.EW, pady=5)
+        self.visualizer.set_network_canvas(self._network_canvas)
+        row += 1
 
         # ════════════════════════════════════════
         # 監視器面板 (對應 NetLogo MONITOR 元件)
