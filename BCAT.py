@@ -1946,7 +1946,7 @@ class ModelVisualizer:
         attitudes = self.model._states[:, self.model._ATT]
 
         x_max = 101 if self.model.avg_of_attitudes == 100 else 100
-        ax.hist(attitudes, bins=range(1, x_max + 1), color='red', edgecolor='darkred',
+        ax.hist(attitudes, bins=range(1, x_max + 1), color='red', edgecolor='none',
                 alpha=0.7, rwidth=0.8)
         ax.set_xlim(1, x_max)
 
@@ -1974,7 +1974,7 @@ class ModelVisualizer:
         thresholds = self.model._states[:, self.model._THETA]
 
         x_max = 101 if self.model.avg_of_thresholds == 100 else 100
-        ax.hist(thresholds, bins=range(1, x_max + 1), color='red', edgecolor='darkred',
+        ax.hist(thresholds, bins=range(1, x_max + 1), color='red', edgecolor='none',
                 alpha=0.7, rwidth=0.8)
         ax.set_xlim(1, x_max)
 
