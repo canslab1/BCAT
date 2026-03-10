@@ -132,6 +132,7 @@ from matplotlib.figure import Figure                                # matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg     # matplotlib 嵌入 Tkinter
 from matplotlib.backends.backend_agg import FigureCanvasAgg         # 離線渲染 (線程安全)
 import matplotlib.colors as mcolors                                 # 顏色處理
+from matplotlib.lines import Line2D                                  # 自訂圖例元素
 import random                                                       # 對應 NetLogo 的 random 系列函數
 import os                                                           # 檔案與目錄操作
 import time as time_module                                          # 時間控制 (避免與 turtles-own 的 time 衝突)
@@ -1690,6 +1691,25 @@ class ModelVisualizer:
         ax.set_aspect('equal')
         ax.set_axis_off()
 
+        # ─── 圖例: 節點顏色說明 ───
+        legend_handles = [
+            Line2D([0], [0], marker='o', color='w',
+                   markerfacecolor='red', markersize=5,
+                   label='Adopter'),
+            Line2D([0], [0], marker='o', color='w',
+                   markerfacecolor=(0, 1.0, 0), markersize=5,
+                   label='High attitude'),
+            Line2D([0], [0], marker='o', color='w',
+                   markerfacecolor=(0, 0.5, 0), markersize=5,
+                   label='Mid attitude'),
+            Line2D([0], [0], marker='o', color='w',
+                   markerfacecolor=(0, 0.05, 0), markersize=5,
+                   label='Low attitude'),
+        ]
+        ax.legend(handles=legend_handles, loc='lower right',
+                  fontsize=5, framealpha=0.7, borderpad=0.3,
+                  handletextpad=0.3, labelspacing=0.2)
+
     # ─── NetLogo 色譜 (類別常數，避免每次重建) ───
     _COLOR_SPECTRUM = [
         '#FFFFFF',   # 9 (white in NetLogo = color 9)
@@ -1736,6 +1756,26 @@ class ModelVisualizer:
             ax.set_ylabel('Attitude')
             ax.set_ylim(1, 100)
             ax.grid(True, linestyle='--', alpha=0.3)
+
+            # ─── 圖例: 點的顏色代表該態度值的 agent 密度 ───
+            legend_handles = [
+                Line2D([0], [0], marker='s', color='w',
+                       markerfacecolor='#FFFFFF', markeredgecolor='gray',
+                       markersize=5, label='1 agent'),
+                Line2D([0], [0], marker='s', color='w',
+                       markerfacecolor='#00FF00',
+                       markersize=5, label='Few agents'),
+                Line2D([0], [0], marker='s', color='w',
+                       markerfacecolor='#0000FF',
+                       markersize=5, label='More agents'),
+                Line2D([0], [0], marker='s', color='w',
+                       markerfacecolor='#000000',
+                       markersize=5, label='Most agents'),
+            ]
+            ax.legend(handles=legend_handles, loc='lower right',
+                      fontsize=6, framealpha=0.7, borderpad=0.3,
+                      handletextpad=0.3, labelspacing=0.2)
+
             self._att_traj_last_drawn_time = -1
             # ax.clear() 會移除所有 artist，必須重建 PathCollection 狀態
             self._att_traj_collections = [None] * 15
