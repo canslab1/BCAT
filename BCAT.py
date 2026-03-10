@@ -1574,39 +1574,43 @@ class ModelVisualizer:
           │                      │   Social     │
           │  Attitude trajectory │   Network    │
           │  (大面積主圖)          │              │
-          │                      │              │
-          ├──────┬───────┬───────┬──────────────┤
-          │ New  │Attit. │Thres- │ Node degree  │
-          │adopt.│dist.  │hold   │ dist.        │
-          │ dyn. │       │dist.  │              │
-          ├──────┴───────┴───────┴──────────────┤
+          ├───────────┬──────────┬──────────────┤
+          │ Attitude  │Threshold │ Node degree  │
+          │ dist.     │ dist.    │ dist.        │
+          ├───────────┴──────────┴──────────────┤
           │ Adoption dynamics (全寬)             │
+          ├─────────────────────────────────────┤
+          │ New adopter dynamics (全寬)          │
           └─────────────────────────────────────┘
 
         Python 使用嵌套 GridSpec 實現佈局:
           Row 0: attitude_trajectory (60%), network (40%)
-          Row 1: new_adopter, attitude_dist, threshold, degree ← 四等分
+          Row 1: attitude_dist, threshold_dist, degree_dist ← 三等分
           Row 2: adoption_dynamics (全寬)
+          Row 3: new_adopter_dynamics (全寬，與 Row 2 等寬等高)
         """
         self.fig = Figure(figsize=fig_size, dpi=100)
 
-        # 外層 GridSpec: 3 行，Row 0/2 各自再用 subgridspec 分割
-        gs = self.fig.add_gridspec(3, 1, hspace=0.4)
+        # 外層 GridSpec: 4 行，height_ratios 控制各列高度比例
+        gs = self.fig.add_gridspec(4, 1, hspace=0.4,
+                                   height_ratios=[3, 2, 1.5, 1.5])
 
         # Row 0: 態度軌跡 (60%) + 網絡圖 (40%)
         gs_row0 = gs[0, 0].subgridspec(1, 2, width_ratios=[3, 2], wspace=0.3)
         self.axes['attitude_trajectory']  = self.fig.add_subplot(gs_row0[0, 0])
         self.axes['network']              = self.fig.add_subplot(gs_row0[0, 1])
 
-        # Row 1: 四等分，wspace=0.6 確保圖間距夠大
-        gs_row1 = gs[1, 0].subgridspec(1, 4, wspace=0.6)
-        self.axes['new_adopter_dynamics'] = self.fig.add_subplot(gs_row1[0, 0])
-        self.axes['attitude_dist']        = self.fig.add_subplot(gs_row1[0, 1])
-        self.axes['threshold_dist']       = self.fig.add_subplot(gs_row1[0, 2])
-        self.axes['degree_dist']          = self.fig.add_subplot(gs_row1[0, 3])
+        # Row 1: 三等分 (原本四等分，移除 new_adopter_dynamics 後空間更寬裕)
+        gs_row1 = gs[1, 0].subgridspec(1, 3, wspace=0.5)
+        self.axes['attitude_dist']        = self.fig.add_subplot(gs_row1[0, 0])
+        self.axes['threshold_dist']       = self.fig.add_subplot(gs_row1[0, 1])
+        self.axes['degree_dist']          = self.fig.add_subplot(gs_row1[0, 2])
 
         # Row 2: 採用動態 (全寬)
         self.axes['adoption_dynamics']    = self.fig.add_subplot(gs[2, 0])
+
+        # Row 3: 新採用者動態 (全寬，與 Row 2 等寬等高)
+        self.axes['new_adopter_dynamics'] = self.fig.add_subplot(gs[3, 0])
 
         return self.fig
 
