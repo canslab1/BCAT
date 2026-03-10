@@ -139,6 +139,7 @@ The BCAT model operates in the following phases per time step:
 - NumPy arrays replace NetLogo's `turtles-own` for performance optimization.
 - NetworkX graphs replace NetLogo's native turtle/link network structure.
 - Both versions produce statistically equivalent results under identical random seeds and parameter settings.
+- **Attitude Trajectory rendering optimization**: scatter points are grouped by color into 15 fixed PathCollection objects and updated incrementally via `set_offsets()`, reducing `draw_idle()` artist traversal from O(T×K) to O(1).
 
 ## Project Structure
 
@@ -147,7 +148,11 @@ BCAT/
 ├── BCAT.py                                # Python 3 implementation with GUI (Tkinter + matplotlib)
 ├── English - best game no one played.nlogo # NetLogo 4.0.5 implementation
 ├── requirements.txt                       # Python dependencies
+├── pyproject.toml                         # Project metadata (PEP 621)
 ├── CITATION.cff                           # Citation metadata
+├── CHANGELOG.md                           # Version history
+├── CONTRIBUTING.md                        # Contribution guidelines
+├── COMPLEXITY_ANALYSIS.md                 # Time/space complexity analysis
 ├── test_scenarios/                        # Parameter configs for paper reproduction
 │   ├── fig4_favorable_review_good_sales.json
 │   ├── fig5_favorable_review_poor_sales.json

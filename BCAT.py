@@ -1555,6 +1555,8 @@ class ModelVisualizer:
         # visualizer 只需追蹤繪圖狀態（Line2D 物件和已繪製的時間步）。
         # attitude_trajectory: 只繪製新增的時間步
         self._att_traj_last_drawn_time = -1
+        self._att_traj_collections = [None] * 15  # 每種顏色一個 PathCollection
+        self._att_traj_points = [[] for _ in range(15)]  # 每種顏色的 (t, att) 座標累積
         # adoption_dynamics: 只追加新數據點 (保留 Line2D 物件)
         self._adoption_line_adopters     = None
         self._adoption_line_non_adopters = None
@@ -1702,9 +1704,10 @@ class ModelVisualizer:
           X軸: Time (1~max-time), Y軸: Attitude (1~100)
 
         效能最佳化:
-          增量繪圖 — 只繪製自上次更新以來新增的時間步，
-          不再每次 clear + 重繪所有歷史資料。
-          原始版本 O(T²) → 最佳化後 O(T)，其中 T 為已經過的時間步數。
+          將每個 (t, att) 的獨立 ax.scatter() 呼叫改為按顏色分組，
+          每種顏色固定一個 PathCollection，以 set_offsets() 增量更新。
+          axes 上的 artist 數量從 O(T×K) 降為固定 15 個，
+          使 draw_idle() 的渲染成本與時間步數無關。
         """
         ax = self.axes['attitude_trajectory']
 
@@ -1720,6 +1723,9 @@ class ModelVisualizer:
             ax.set_ylim(1, 100)
             ax.grid(True, linestyle='--', alpha=0.3)
             self._att_traj_last_drawn_time = -1
+            # ax.clear() 會移除所有 artist，必須重建 PathCollection 狀態
+            self._att_traj_collections = [None] * 15
+            self._att_traj_points = [[] for _ in range(15)]
 
         # ─── 增量繪圖: 從模型的態度快照中讀取所有未繪製的時間步 ───
         # 資料由 model.step() 每步記錄到 model._attitude_snapshots，
@@ -1735,6 +1741,10 @@ class ModelVisualizer:
         # 注意: 快照在 step() 的 current_time += 1 之前記錄，
         # 所以 key 範圍是 0..current_time-1。用 snapshots 的實際 key 確保不遺漏。
         max_snap_t = max(snapshots.keys()) if snapshots else -1
+
+        # 追蹤哪些顏色有新增資料（避免不必要的 set_offsets 呼叫）
+        dirty = set()
+
         for t in range(last_drawn + 1, max_snap_t + 1):
             attitudes = snapshots.get(t)
             if attitudes is None:
@@ -1744,8 +1754,22 @@ class ModelVisualizer:
                     log_count = math.log2(count) if count > 1 else 0
                     color_index = _nl_round(log_count * ((n_colors - 1) / log_total))
                     color_index = max(0, min(color_index, n_colors - 1))
-                    ax.scatter(t, att, color=color_spectrum[color_index],
-                               s=1, marker=',', linewidths=0, alpha=0.9)
+                    self._att_traj_points[color_index].append((t, att))
+                    dirty.add(color_index)
+
+        # 更新有新增資料的 PathCollection
+        for ci in dirty:
+            pts = self._att_traj_points[ci]
+            offsets = np.array(pts)
+            if self._att_traj_collections[ci] is None:
+                # 首次出現此顏色 → 建立 PathCollection
+                self._att_traj_collections[ci] = ax.scatter(
+                    offsets[:, 0], offsets[:, 1],
+                    color=color_spectrum[ci],
+                    s=1, marker=',', linewidths=0, alpha=0.9)
+            else:
+                # 追加座標到現有 PathCollection
+                self._att_traj_collections[ci].set_offsets(offsets)
 
         self._att_traj_last_drawn_time = max_snap_t
         ax.set_xlim(0, max(self.model.max_time, self.model.current_time + 1))
@@ -2040,6 +2064,8 @@ class ModelVisualizer:
         total_turtles = self.model._states.shape[0]
         log_total = math.log2(total_turtles) if total_turtles > 1 else 1
 
+        # ─── 按顏色分組收集所有座標 ───
+        color_points = [[] for _ in range(n_colors)]
         for t in sorted(snapshots.keys()):
             attitudes = snapshots[t]
             for att, count in attitudes.items():
@@ -2047,8 +2073,15 @@ class ModelVisualizer:
                     log_count = math.log2(count) if count > 1 else 0
                     color_index = _nl_round(log_count * ((n_colors - 1) / log_total))
                     color_index = max(0, min(color_index, n_colors - 1))
-                    ax.scatter(t, att, color=color_spectrum[color_index],
-                               s=2, marker=',', linewidths=0, alpha=0.9)
+                    color_points[color_index].append((t, att))
+
+        # 每種顏色一次 scatter 呼叫（最多 15 次，取代原本 ~9,000 次）
+        for ci in range(n_colors):
+            if color_points[ci]:
+                pts = np.array(color_points[ci])
+                ax.scatter(pts[:, 0], pts[:, 1],
+                           color=color_spectrum[ci],
+                           s=2, marker=',', linewidths=0, alpha=0.9)
 
         ax.set_xlim(0, max(self.model.max_time, self.model.current_time + 1))
 
