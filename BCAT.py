@@ -2326,76 +2326,23 @@ class ModelGUI(tk.Tk):
         monitor_frame = ttk.LabelFrame(control_frame, text="Monitors", padding=5)
         monitor_frame.grid(row=row, column=0, columnspan=2, sticky=tk.EW, pady=10)
 
-        # ─── MONITOR PA (780, 10, 842, 59) ───
-        # count turtles with [ att > 50 and att <= 100 ]
-        self.pa_var = tk.StringVar(value="0")
-        ttk.Label(monitor_frame, text="PA").grid(row=0, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.pa_var, width=10, anchor=tk.E).grid(row=0, column=1)
-
-        # ─── MONITOR NA (780, 147, 842, 196) ───
-        # count turtles with [ att <= 50 and att > 0 ]
-        self.na_var = tk.StringVar(value="0")
-        ttk.Label(monitor_frame, text="NA").grid(row=1, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.na_var, width=10, anchor=tk.E).grid(row=1, column=1)
-
-        # ─── MONITOR Avg PA (780, 58, 842, 103) ───
-        # mean [ att ] of turtles with [att > 50 and att <= 100]
-        self.avg_pa_var = tk.StringVar(value="0.00")
-        ttk.Label(monitor_frame, text="Avg PA").grid(row=2, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.avg_pa_var, width=10, anchor=tk.E).grid(row=2, column=1)
-
-        # ─── MONITOR Std PA (780, 103, 842, 148) ───
-        # standard-deviation [ att ] of turtles with [ att > 50 and att <= 100 ]
-        self.std_pa_var = tk.StringVar(value="0.00")
-        ttk.Label(monitor_frame, text="Std PA").grid(row=3, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.std_pa_var, width=10, anchor=tk.E).grid(row=3, column=1)
-
-        # ─── MONITOR Avg NA (780, 195, 842, 240) ───
-        # ifelse-value (...) [0] [mean [ att ] of turtles with [ att >= 0 and att < 50 ]]
-        self.avg_na_var = tk.StringVar(value="0.00")
-        ttk.Label(monitor_frame, text="Avg NA").grid(row=4, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.avg_na_var, width=10, anchor=tk.E).grid(row=4, column=1)
-
-        # ─── MONITOR Std NA (780, 239, 842, 284) ───
-        # ifelse-value (...) [ 0 ] [ standard-deviation [ att ] of turtles with [ att < 50 ] ]
-        self.std_na_var = tk.StringVar(value="0.00")
-        ttk.Label(monitor_frame, text="Std NA").grid(row=5, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.std_na_var, width=10, anchor=tk.E).grid(row=5, column=1)
-
-        # ─── MONITOR Links (780, 285, 842, 330) ───
-        # count links
-        self.links_var = tk.StringVar(value="0")
-        ttk.Label(monitor_frame, text="Links").grid(row=6, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.links_var, width=10, anchor=tk.E).grid(row=6, column=1)
-
-        # ─── MONITOR Critical (780, 330, 842, 375) ───
+        # ─── MONITOR Critical ───
         # critical-point
         self.critical_var = tk.StringVar(value="0")
-        ttk.Label(monitor_frame, text="Critical").grid(row=7, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.critical_var, width=10, anchor=tk.E).grid(row=7, column=1)
-
-        # ─── MONITOR Adopter (780, 374, 842, 423) ───
-        # count turtles with [ act = true ]
-        self.adopter_var = tk.StringVar(value="0")
-        ttk.Label(monitor_frame, text="Adopter").grid(row=8, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.adopter_var, width=10, anchor=tk.E).grid(row=8, column=1)
-
-        # 當前時間 (對應 NetLogo 的 ticks 顯示在 GRAPHICS-WINDOW 標題)
-        self.time_var = tk.StringVar(value="0")
-        ttk.Label(monitor_frame, text="Time").grid(row=9, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.time_var, width=10, anchor=tk.E).grid(row=9, column=1)
+        ttk.Label(monitor_frame, text="Critical").grid(row=0, column=0, sticky=tk.W)
+        ttk.Label(monitor_frame, textvariable=self.critical_var, width=10, anchor=tk.E).grid(row=0, column=1)
 
         # ─── MONITOR FRI (Favorable Review Index) ───
         # FRI = count(att > 50) / N
-        self.fri_var = tk.StringVar(value="0.00")
-        ttk.Label(monitor_frame, text="FRI").grid(row=10, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.fri_var, width=10, anchor=tk.E).grid(row=10, column=1)
+        self.fri_var = tk.StringVar(value="0.0000")
+        ttk.Label(monitor_frame, text="FRI").grid(row=1, column=0, sticky=tk.W)
+        ttk.Label(monitor_frame, textvariable=self.fri_var, width=10, anchor=tk.E).grid(row=1, column=1)
 
         # ─── MONITOR GSI (Good Sales Index) ───
         # GSI = count(act = true) / N
-        self.gsi_var = tk.StringVar(value="0.00")
-        ttk.Label(monitor_frame, text="GSI").grid(row=11, column=0, sticky=tk.W)
-        ttk.Label(monitor_frame, textvariable=self.gsi_var, width=10, anchor=tk.E).grid(row=11, column=1)
+        self.gsi_var = tk.StringVar(value="0.0000")
+        ttk.Label(monitor_frame, text="GSI").grid(row=2, column=0, sticky=tk.W)
+        ttk.Label(monitor_frame, textvariable=self.gsi_var, width=10, anchor=tk.E).grid(row=2, column=1)
 
         # ════════════════════════════════════════
         # 右側圖表區域
@@ -2480,77 +2427,21 @@ class ModelGUI(tk.Tk):
             states = self.model._states
             ATT = self.model._ATT
             ACT = self.model._ACT
+            n_total = states.shape[0]
             att_col = states[:, ATT]
-
-            # ─── MONITOR PA: count turtles with [ att > 50 and att <= 100 ] ───
-            pa_mask = (att_col > 50) & (att_col <= 100)
-            pa_count = int(np.sum(pa_mask))
-            self.pa_var.set(str(pa_count))
-
-            # ─── MONITOR Avg PA / Std PA ───
-            if pa_count > 0:
-                pa_atts = att_col[pa_mask]
-                self.avg_pa_var.set(f"{float(np.mean(pa_atts)):.2f}")
-                # NetLogo standard-deviation 在只有 1 個元素時回傳 0;
-                # np.std(ddof=1) 在 n=1 時產生 0/0 → nan + RuntimeWarning
-                self.std_pa_var.set(
-                    f"{float(np.std(pa_atts, ddof=1)):.2f}" if pa_count > 1 else "0.00"
-                )
-            else:
-                self.avg_pa_var.set("N/A")
-                self.std_pa_var.set("N/A")
-
-            # ─── MONITOR NA: count turtles with [ att <= 50 and att > 0 ] ───
-            na_mask = (att_col > 0) & (att_col <= 50)
-            na_count = int(np.sum(na_mask))
-            self.na_var.set(str(na_count))
-
-            # ─── MONITOR Avg NA / Std NA ───
-            # 注意: NetLogo 中三個 NA monitor 的篩選條件不一致:
-            #   NA count:  att <= 50 and att > 0  (含50, 不含0)
-            #   Avg NA:    att >= 0 and att < 50   (含0, 不含50)
-            #   Std NA:    att < 50                (含0和負值, 不含50)
-            # Python 忠實複製此不一致行為。
-            if na_count > 0:
-                avg_na_atts = att_col[(att_col >= 0) & (att_col < 50)]
-                if len(avg_na_atts) > 0:
-                    self.avg_na_var.set(f"{float(np.mean(avg_na_atts)):.2f}")
-                else:
-                    self.avg_na_var.set("0")
-                std_na_atts = att_col[att_col < 50]
-                n_std = len(std_na_atts)
-                # NetLogo standard-deviation 在只有 1 個元素時回傳 0
-                if n_std > 1:
-                    self.std_na_var.set(f"{float(np.std(std_na_atts, ddof=1)):.2f}")
-                elif n_std == 1:
-                    self.std_na_var.set("0.00")
-                else:
-                    self.std_na_var.set("0")
-            else:
-                self.avg_na_var.set("0")
-                self.std_na_var.set("0")
-
-            # ─── MONITOR Links: count links ───
-            self.links_var.set(str(self.model.G.number_of_edges()))
 
             # ─── MONITOR Critical: critical-point ───
             self.critical_var.set(str(self.model.critical_point))
 
-            # ─── MONITOR Adopter: count turtles with [ act = true ] ───
-            adopter_count = int(np.sum(states[:, ACT]))
-            self.adopter_var.set(str(adopter_count))
-
-            # ─── MONITOR FRI: Favorable Review Index = PA / N ───
-            n_total = states.shape[0]
+            # ─── MONITOR FRI: Favorable Review Index = count(att > 50) / N ───
+            pa_count = int(np.sum((att_col > 50) & (att_col <= 100)))
             fri = pa_count / n_total if n_total > 0 else 0.0
-            self.fri_var.set(f"{fri:.2f}")
+            self.fri_var.set(f"{fri:.4f}")
 
-            # ─── MONITOR GSI: Good Sales Index = Adopter / N ───
+            # ─── MONITOR GSI: Good Sales Index = count(act = true) / N ───
+            adopter_count = int(np.sum(states[:, ACT]))
             gsi = adopter_count / n_total if n_total > 0 else 0.0
-            self.gsi_var.set(f"{gsi:.2f}")
-
-            # ─── Time (ticks) ───
-            self.time_var.set(str(self.model.current_time))
+            self.gsi_var.set(f"{gsi:.4f}")
 
         except Exception as e:
             print(f"Monitor update error: {e}")
