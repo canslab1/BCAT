@@ -1843,6 +1843,7 @@ class ModelVisualizer:
             ax.set_title('Adoption Dynamics', fontsize=9, color='blue', fontweight='bold')
             ax.set_xlabel('Time')
             ax.set_ylabel('Agent')
+            ax.grid(True, linestyle='--', alpha=0.3)
             self._adoption_line_adopters = None
             self._adoption_line_non_adopters = None
 
@@ -1894,6 +1895,7 @@ class ModelVisualizer:
             ax.set_title('New Adopter Dynamics', fontsize=9, color='blue', fontweight='bold')
             ax.set_xlabel('Time')
             ax.set_ylabel('Agent')
+            ax.grid(True, linestyle='--', alpha=0.3)
             self._new_adopter_line = None
 
         if self.model.G is None or self.model._states.shape[0] == 0:
