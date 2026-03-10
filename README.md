@@ -1,4 +1,4 @@
-# BCAT: Bounded Confidence and Adoption Threshold Model
+# BCAT — Bounded Confidence and Adoption Threshold Model
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
@@ -30,6 +30,14 @@ Each simulation consists of 400 agents connected by approximately 1,600 edges, w
 ### Python Version
 
 - Python 3.10 or later (tested on Python 3.12 and 3.13)
+
+### Setup
+
+```bash
+git clone https://github.com/canslab1/BCAT.git
+cd BCAT
+pip install -r requirements.txt
+```
 
 ### Dependencies
 

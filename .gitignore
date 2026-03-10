@@ -21,7 +21,12 @@ env/
 
 # OS
 .DS_Store
+._.DS_Store
 Thumbs.db
+
+# Dropbox Conflict Copies
+*衝突的複本*
+*(conflicted copy*
 
 # Project-specific
 *.pkl

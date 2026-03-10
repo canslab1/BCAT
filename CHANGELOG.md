@@ -1,5 +1,9 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
 ## v1.3.0 (2025-03-10)
 
 ### Added
@@ -7,7 +11,7 @@
 - **Chart legends**: Attitude Trajectory shows a horizontal 15-color density colorbar (Few → Many); Social Network shows a non-overlapping legend for node colors (adopter, high/mid/low attitude).
 - **Grid lines**: Adoption Dynamics and New Adopter Dynamics charts now display dashed grid lines for easier reading.
 
-### Improved
+### Changed
 - **Monitors simplified**: removed 9 legacy monitors (PA, NA, Avg PA, Std PA, Avg NA, Std NA, Links, Adopter, Time); kept only Critical, FRI, and GSI.
 - **Chart title styling**: all chart titles rendered in blue bold font with reduced font size (fontsize=9) to avoid overlap with adjacent axis labels.
 - **Social Network enlarged**: figure size increased from (4,4) to (5,5) for better visibility.
@@ -17,7 +21,7 @@
 
 ## v1.2.0 (2025-03-10)
 
-### Improved
+### Changed
 - **GUI layout redesign**: moved Social Network chart to the left control panel as a separate Figure, freeing the right panel for four full-width rows. The three time-series plots (Attitude Trajectory, Adoption Dynamics, New Adopter Dynamics) now share the same full-width X axis (Time).
 - **Right panel row order**: distribution charts (Attitude, Threshold, Degree) occupy the top row; Attitude Trajectory, Adoption Dynamics, and New Adopter Dynamics follow in full-width rows below.
 - **Enlarged Social Network chart**: increased figure size from (3,3) to (4,4) for better visibility in the left panel.
@@ -25,7 +29,7 @@
 
 ## v1.1.0 (2025-03-10)
 
-### Improved
+### Changed
 - **Attitude Trajectory rendering performance**: compressed ~9,000 PathCollection objects into 15 fixed ones (one per color), using `set_offsets()` for incremental updates. Reduces `draw_idle()` artist traversal from O(T×K) to O(1), eliminating progressive slowdown at later time steps.
 - **Hi-res export performance**: `save_attitude_trajectory_hires()` now batches scatter calls by color (max 15 calls instead of ~9,000).
 
