@@ -1653,7 +1653,7 @@ class ModelVisualizer:
         """
         ax = self.axes['network']
         ax.clear()
-        ax.set_title('Social Network')
+        ax.set_title('Social Network', fontsize=9, color='blue', fontweight='bold')
 
         if self.model.G is None or self.model._states.shape[0] == 0:
             return
@@ -1731,7 +1731,7 @@ class ModelVisualizer:
         # 檢測模型重置 → 需要完全重繪
         if self.model.current_time == 0 or self._needs_full_redraw:
             ax.clear()
-            ax.set_title('Attitude Trajectory', fontsize=9)
+            ax.set_title('Attitude Trajectory', fontsize=9, color='blue', fontweight='bold')
             ax.set_xlabel('Time')
             ax.set_ylabel('Attitude')
             ax.set_ylim(1, 100)
@@ -1805,7 +1805,7 @@ class ModelVisualizer:
         # 檢測模型重置或首次繪製 → 設定標題和軸標籤
         if self._needs_full_redraw or self._adoption_line_adopters is None:
             ax.clear()
-            ax.set_title('Adoption Dynamics', fontsize=9)
+            ax.set_title('Adoption Dynamics', fontsize=9, color='blue', fontweight='bold')
             ax.set_xlabel('Time')
             ax.set_ylabel('Agent')
             self._adoption_line_adopters = None
@@ -1856,7 +1856,7 @@ class ModelVisualizer:
         # 檢測模型重置或首次繪製 → 設定標題和軸標籤
         if self._needs_full_redraw or self._new_adopter_line is None:
             ax.clear()
-            ax.set_title('New Adopter Dynamics', fontsize=9)
+            ax.set_title('New Adopter Dynamics', fontsize=9, color='blue', fontweight='bold')
             ax.set_xlabel('Time')
             ax.set_ylabel('Agent')
             self._new_adopter_line = None
@@ -1898,7 +1898,7 @@ class ModelVisualizer:
         """
         ax = self.axes['attitude_dist']
         ax.clear()
-        ax.set_title('Attitude Distribution', fontsize=9)
+        ax.set_title('Attitude Distribution', fontsize=9, color='blue', fontweight='bold')
         ax.set_xlabel('Attitude', fontsize=8)
         ax.set_ylabel('Agent', fontsize=8)
 
@@ -1926,7 +1926,7 @@ class ModelVisualizer:
         """
         ax = self.axes['threshold_dist']
         ax.clear()
-        ax.set_title('Threshold Distribution', fontsize=9)
+        ax.set_title('Threshold Distribution', fontsize=9, color='blue', fontweight='bold')
         ax.set_xlabel('Threshold', fontsize=8)
         ax.set_ylabel('Agent', fontsize=8)
 
@@ -1974,7 +1974,7 @@ class ModelVisualizer:
         """
         ax = self.axes['degree_dist']
         ax.clear()
-        ax.set_title('Degree Distribution', fontsize=9)
+        ax.set_title('Degree Distribution', fontsize=9, color='blue', fontweight='bold')
 
         if self.model.G is None:
             return
@@ -2072,7 +2072,7 @@ class ModelVisualizer:
         hires_fig = Figure(figsize=(10, 6), dpi=dpi)
         FigureCanvasAgg(hires_fig)  # 附加 Agg 畫布以支援 savefig
         ax = hires_fig.add_subplot(111)
-        ax.set_title('Attitude Trajectory', fontsize=14)
+        ax.set_title('Attitude Trajectory', fontsize=14, color='blue', fontweight='bold')
         ax.set_xlabel('Time', fontsize=12)
         ax.set_ylabel('Attitude', fontsize=12)
         ax.set_ylim(1, 100)
@@ -2164,7 +2164,7 @@ class ModelGUI(tk.Tk):
         super().__init__()
 
         self.title("BCAT - Best Game No One Played / 叫好不叫座")
-        self.geometry("1400x1100")
+        self.geometry("1400x1150")
 
         # 建立模型和視覺化器
         self.model      = OpinionAdoptionModel()
