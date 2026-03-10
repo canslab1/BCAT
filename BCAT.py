@@ -2164,7 +2164,7 @@ class ModelGUI(tk.Tk):
         super().__init__()
 
         self.title("BCAT - Best Game No One Played / 叫好不叫座")
-        self.geometry("1400x900")
+        self.geometry("1400x1000")
 
         # 建立模型和視覺化器
         self.model      = OpinionAdoptionModel()
