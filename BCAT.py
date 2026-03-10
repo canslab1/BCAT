@@ -1761,7 +1761,7 @@ class ModelVisualizer:
 
             # ─── 圖例: 水平色帶顯示全部 15 種顏色 (agent 密度) ───
             # 使用 inset_axes 繪製色帶，比文字圖例更完整
-            self._att_traj_cbar = ax.inset_axes([0.58, 0.04, 0.38, 0.03])
+            self._att_traj_cbar = ax.inset_axes([0.58, 0.08, 0.38, 0.03])
             color_rgb = np.array([[mcolors.to_rgb(c)
                                    for c in self._COLOR_SPECTRUM]])
             self._att_traj_cbar.imshow(color_rgb, aspect='auto')
