@@ -2033,15 +2033,17 @@ class ModelVisualizer:
                         color='red', s=15, alpha=0.7
                     )
         else:
-            # ─── SWN/RN/CA: 直方圖 ───
+            # ─── SWN/RN/CA: 長條圖 (bar 居中對齊整數刻度) ───
             ax.set_xlabel('Degree', fontsize=8)
             ax.set_ylabel('Node', fontsize=8)
 
-            min_deg = min(degrees) if degrees else 0
-            max_deg = max(degrees) if degrees else 1
-            ax.hist(degrees, bins=range(min_deg, max_deg + 2), color='red',
-                    edgecolor='darkred', alpha=0.7, rwidth=0.8)
-            ax.set_xlim(min_deg, max_deg + 1)
+            from collections import Counter
+            deg_counts = Counter(degrees)
+            deg_values = sorted(deg_counts.keys())
+            counts = [deg_counts[d] for d in deg_values]
+            ax.bar(deg_values, counts, color='red',
+                   edgecolor='darkred', alpha=0.7, width=0.8)
+            ax.set_xticks(deg_values)
 
     def update_plots(self):
         """
