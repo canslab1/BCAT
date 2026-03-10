@@ -2385,6 +2385,18 @@ class ModelGUI(tk.Tk):
         ttk.Label(monitor_frame, text="Time").grid(row=9, column=0, sticky=tk.W)
         ttk.Label(monitor_frame, textvariable=self.time_var, width=10, anchor=tk.E).grid(row=9, column=1)
 
+        # ─── MONITOR FRI (Favorable Review Index) ───
+        # FRI = count(att > 50) / N
+        self.fri_var = tk.StringVar(value="0.00")
+        ttk.Label(monitor_frame, text="FRI").grid(row=10, column=0, sticky=tk.W)
+        ttk.Label(monitor_frame, textvariable=self.fri_var, width=10, anchor=tk.E).grid(row=10, column=1)
+
+        # ─── MONITOR GSI (Good Sales Index) ───
+        # GSI = count(act = true) / N
+        self.gsi_var = tk.StringVar(value="0.00")
+        ttk.Label(monitor_frame, text="GSI").grid(row=11, column=0, sticky=tk.W)
+        ttk.Label(monitor_frame, textvariable=self.gsi_var, width=10, anchor=tk.E).grid(row=11, column=1)
+
         # ════════════════════════════════════════
         # 右側圖表區域
         # ════════════════════════════════════════
@@ -2527,6 +2539,15 @@ class ModelGUI(tk.Tk):
             # ─── MONITOR Adopter: count turtles with [ act = true ] ───
             adopter_count = int(np.sum(states[:, ACT]))
             self.adopter_var.set(str(adopter_count))
+
+            # ─── MONITOR FRI: Favorable Review Index = PA / N ───
+            n_total = states.shape[0]
+            fri = pa_count / n_total if n_total > 0 else 0.0
+            self.fri_var.set(f"{fri:.2f}")
+
+            # ─── MONITOR GSI: Good Sales Index = Adopter / N ───
+            gsi = adopter_count / n_total if n_total > 0 else 0.0
+            self.gsi_var.set(f"{gsi:.2f}")
 
             # ─── Time (ticks) ───
             self.time_var.set(str(self.model.current_time))
