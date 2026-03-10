@@ -62,13 +62,14 @@ python3 BCAT.py
 ```
 
 This launches the GUI application with:
-- **Left panel**: Parameter sliders and control buttons
-- **Center/Right panels**: Real-time visualization plots
-  - Attitude Trajectory (opinion evolution over time)
+- **Left panel**: Parameter sliders, control buttons, Social Network visualization, and monitors
   - Social Network (node colors reflect attitudes and adoption status)
-  - New Adopter Dynamics, Attitude Distribution, Threshold Distribution, Degree Distribution
-  - Adoption Dynamics (adopter vs. non-adopter counts)
-- **Monitors**: PA, NA, Avg PA, Std PA, Avg NA, Std NA, Links, Critical Point, Adopter count
+  - Monitors: PA, NA, Avg PA, Std PA, Avg NA, Std NA, Links, Critical Point, Adopter count
+- **Right panel**: Real-time visualization plots (4 rows)
+  - Row 1: Attitude Distribution, Threshold Distribution, Degree Distribution
+  - Row 2: Attitude Trajectory (opinion evolution over time, full-width)
+  - Row 3: Adoption Dynamics (adopter vs. non-adopter counts, full-width)
+  - Row 4: New Adopter Dynamics (full-width)
 
 ### Controls
 
@@ -140,6 +141,7 @@ The BCAT model operates in the following phases per time step:
 - NetworkX graphs replace NetLogo's native turtle/link network structure.
 - Both versions produce statistically equivalent results under identical random seeds and parameter settings.
 - **Attitude Trajectory rendering optimization**: scatter points are grouped by color into 15 fixed PathCollection objects and updated incrementally via `set_offsets()`, reducing `draw_idle()` artist traversal from O(T×K) to O(1).
+- **Dual-Figure architecture**: Social Network is rendered on a separate matplotlib Figure embedded in the left panel, allowing the three time-series plots (Attitude Trajectory, Adoption Dynamics, New Adopter Dynamics) to share a full-width X axis (Time) in the right panel.
 
 ## Project Structure
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.0 (2025-03-10)
+
+### Improved
+- **GUI layout redesign**: moved Social Network chart to the left control panel as a separate Figure, freeing the right panel for four full-width rows. The three time-series plots (Attitude Trajectory, Adoption Dynamics, New Adopter Dynamics) now share the same full-width X axis (Time).
+- **Right panel row order**: distribution charts (Attitude, Threshold, Degree) occupy the top row; Attitude Trajectory, Adoption Dynamics, and New Adopter Dynamics follow in full-width rows below.
+- **Enlarged Social Network chart**: increased figure size from (3,3) to (4,4) for better visibility in the left panel.
+- **Unified title font sizes**: all three time-series plots now use the same default title font size for visual consistency.
+
 ## v1.1.0 (2025-03-10)
 
 ### Improved
