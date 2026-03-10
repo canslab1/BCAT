@@ -1571,12 +1571,12 @@ class ModelVisualizer:
         設定圖形和子圖佈局
 
         對應 NetLogo Interface Tab 的 PLOT 佈局 (已調整):
-          ┌─────────────────────────────────────┐
-          │ Attitude trajectory (全寬)           │
-          ├───────────┬──────────┬──────────────┤
+          ┌───────────┬──────────┬──────────────┐
           │ Attitude  │Threshold │ Node degree  │
           │ dist.     │ dist.    │ dist.        │
           ├───────────┴──────────┴──────────────┤
+          │ Attitude trajectory (全寬)           │
+          ├─────────────────────────────────────┤
           │ Adoption dynamics (全寬)             │
           ├─────────────────────────────────────┤
           │ New adopter dynamics (全寬)          │
@@ -1584,8 +1584,8 @@ class ModelVisualizer:
           (Social Network 圖移至左側控制面板)
 
         Python 使用嵌套 GridSpec 實現佈局:
-          Row 0: attitude_trajectory (全寬)
-          Row 1: attitude_dist, threshold_dist, degree_dist ← 三等分
+          Row 0: attitude_dist, threshold_dist, degree_dist ← 三等分
+          Row 1: attitude_trajectory (全寬)
           Row 2: adoption_dynamics (全寬)
           Row 3: new_adopter_dynamics (全寬)
         """
@@ -1593,16 +1593,16 @@ class ModelVisualizer:
 
         # 外層 GridSpec: 4 行，height_ratios 控制各列高度比例
         gs = self.fig.add_gridspec(4, 1, hspace=0.4,
-                                   height_ratios=[3, 2, 1.5, 1.5])
+                                   height_ratios=[2, 3, 1.5, 1.5])
 
-        # Row 0: 態度軌跡 (全寬)
-        self.axes['attitude_trajectory']  = self.fig.add_subplot(gs[0, 0])
+        # Row 0: 三等分 (分佈圖)
+        gs_row0 = gs[0, 0].subgridspec(1, 3, wspace=0.5)
+        self.axes['attitude_dist']        = self.fig.add_subplot(gs_row0[0, 0])
+        self.axes['threshold_dist']       = self.fig.add_subplot(gs_row0[0, 1])
+        self.axes['degree_dist']          = self.fig.add_subplot(gs_row0[0, 2])
 
-        # Row 1: 三等分
-        gs_row1 = gs[1, 0].subgridspec(1, 3, wspace=0.5)
-        self.axes['attitude_dist']        = self.fig.add_subplot(gs_row1[0, 0])
-        self.axes['threshold_dist']       = self.fig.add_subplot(gs_row1[0, 1])
-        self.axes['degree_dist']          = self.fig.add_subplot(gs_row1[0, 2])
+        # Row 1: 態度軌跡 (全寬)
+        self.axes['attitude_trajectory']  = self.fig.add_subplot(gs[1, 0])
 
         # Row 2: 採用動態 (全寬)
         self.axes['adoption_dynamics']    = self.fig.add_subplot(gs[2, 0])
@@ -1612,7 +1612,7 @@ class ModelVisualizer:
 
         return self.fig
 
-    def setup_network_figure(self, fig_size=(3, 3)):
+    def setup_network_figure(self, fig_size=(4, 4)):
         """
         設定 Social Network 圖的獨立 Figure (嵌入左側控制面板)
 
@@ -1856,9 +1856,9 @@ class ModelVisualizer:
         # 檢測模型重置或首次繪製 → 設定標題和軸標籤
         if self._needs_full_redraw or self._new_adopter_line is None:
             ax.clear()
-            ax.set_title('New Adopter Dynamics', fontsize=9)
-            ax.set_xlabel('Time', fontsize=8)
-            ax.set_ylabel('Agent', fontsize=8)
+            ax.set_title('New Adopter Dynamics')
+            ax.set_xlabel('Time')
+            ax.set_ylabel('Agent')
             self._new_adopter_line = None
 
         if self.model.G is None or self.model._states.shape[0] == 0:
