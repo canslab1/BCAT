@@ -6,7 +6,7 @@ BCAT (Bounded Confidence Adoption Threshold) 模擬模型
 從 NetLogo 4.0.5 轉換至 Python 3.13
 
 原始 NetLogo 檔案: "English - best game no one played.nlogo"
-                    "best game no one played.nlogo" (中文版)
+                  "best game no one played.nlogo" (中文版)
 
 本程式完整對應 NetLogo 4.0.5 的 BCAT 模型，包含：
   1. 核心模擬邏輯 (OpinionAdoptionModel)
@@ -116,7 +116,7 @@ BCAT 模型核心數學公式 (語言無關):
   - Random permutation:  shuffle(list) — Fisher-Yates 或等價演算法
   - Random choice:       從列表中均勻隨機選取一個元素
   - round():             必須使用 round-half-up (傳統四捨五入),
-                          而非 Python 3 預設的 round-half-to-even (銀行家捨入)
+                         而非 Python 3 預設的 round-half-to-even (銀行家捨入)
 """
 
 import warnings                                                     # 用於抑制字體缺失警告
@@ -211,7 +211,7 @@ class _NodeStateView:
             return val != 0.0
         elif col == 3:    # time → 回傳 int
             return int(val)
-        return val         # att, theta → 回傳 float
+        return val        # att, theta → 回傳 float
 
     def __setitem__(self, key, value):
         col = self._KEY_MAP[key]
@@ -272,30 +272,27 @@ class OpinionAdoptionModel:
     完整對應 NetLogo 4.0.5 的所有 procedures (程序)。
 
     NetLogo 程序對照:
-      startup              → __init__() + setup()
-      setup                → setup()
-      clear                → _clear() (內嵌於 setup)
-      setup-social-network → setup_social_network()
-      setup-scale-free-network   → setup_scale_free_network()
-      setup-small-world-network  → setup_small_world_network()
-      make-node            → (內聯於 setup_scale_free_network)
-      find-partner         → _find_partner()
-      add-link             → _add_link()
-      set-posXY-of-nodes   → _set_pos_xy_of_nodes()
-      setup-agent-population     → setup_agent_population()
-      chosen-leaders       → _chosen_leaders()
-      go                   → go()
-      communicate-and-make-decision → _communicate_and_make_decision()
-      communicate          → _communicate()
-      change-opinion-1     → _change_opinion_1()
-      change-opinion-2     → _change_opinion_2()
-      change-opinion-3     → _change_opinion_3()
-      make-decision        → _make_decision()
-      become-action        → _become_action()
-      become-susceptible   → _become_susceptible()
-      critical-point       → critical_point (property)
-      run-100-experiments  → run_experiments()
-      import-simulation    → load_model_state()
+      startup                       → __init__() + setup()
+      setup                         → setup()
+      clear                         → _clear() (內嵌於 setup)
+      setup-social-network          → setup_social_network()
+      setup-scale-free-network      → setup_scale_free_network()
+      setup-small-world-network     → setup_small_world_network()
+      make-node                     → (內聯於 setup_scale_free_network)
+      find-partner                  → _find_partner()
+      add-link                      → _add_link()
+      set-posXY-of-nodes            → _set_pos_xy_of_nodes()
+      setup-agent-population        → setup_agent_population()
+      chosen-leaders                → _chosen_leaders()
+      go                            → go()
+      communicate-and-make-decision ┐
+      communicate                   │
+      change-opinion-1/2/3          ├→ (全部內聯於 _step_all_agents)
+      make-decision                 │
+      become-action                 ┘
+      critical-point                → critical_point (property)
+      run-100-experiments           → run_experiments()
+      import-simulation             → load_model_state()
 
     效能最佳化 (相對原始版本):
       - 使用 NumPy 陣列取代巢狀字典 (node_states)，減少雜湊查找開銷
@@ -431,8 +428,8 @@ class OpinionAdoptionModel:
         建立鄰居快取 — 在網絡建立後呼叫一次
 
         效能最佳化:
-          原始版本在每次 _communicate_and_make_decision 和 _make_decision 中
-          都呼叫 list(self.G.neighbors(node))，共計 400×300×2=240,000 次列表建構。
+          原始版本在每次交流與決策中都呼叫 list(self.G.neighbors(node))，
+          共計 400×300×2=240,000 次列表建構。
           預計算並快取後，改為簡單的字典查找。
 
         """
@@ -880,7 +877,7 @@ class OpinionAdoptionModel:
 
         # ─── 建立 _states 陣列: [att, theta, act, time] ───
         self._states = np.empty((n_nodes, self._N_FIELDS), dtype=np.float64)
-        self._states[:, self._ATT]   = att_arr      # 態度值 (1~100)
+        self._states[:, self._ATT]   = att_arr       # 態度值 (1~100)
         self._states[:, self._THETA] = theta_arr     # 採納門檻 (1~100)
         self._states[:, self._ACT]   = 0.0           # become-susceptible → False
         self._states[:, self._TIME]  = -1.0          # 尚未採納
@@ -890,7 +887,7 @@ class OpinionAdoptionModel:
         for node in pioneers:
             self._states[node, self._ATT]   = 100.0
             self._states[node, self._THETA] = 0.0
-            self._states[node, self._ACT]   = 1.0   # become-action
+            self._states[node, self._ACT]   = 1.0    # become-action
             self._states[node, self._TIME]  = 0.0    # 在 ticks=0 時採納
 
     def _chosen_leaders(self):
@@ -1149,7 +1146,7 @@ class OpinionAdoptionModel:
             obj = neighbors[_int(rand_vals[node_idx] * n_nb)]
 
             # ─── communicate ───
-            # 規則語義詳見 _communicate() 的 docstring
+            # 規則語義詳見檔案標頭的「BCAT 模型核心數學公式」及「演算法偽代碼」
             # 直接存取 NumPy 陣列而非透過 dict
             A1 = states[obj,  ACT]   # 對象的 act
             A2 = states[node, ACT]   # 自身的 act
@@ -1226,228 +1223,6 @@ class OpinionAdoptionModel:
                             # become-action
                             states[node, ACT]  = 1.0
                             states[node, TIME] = current_time
-
-    # =========================================================================
-    # NetLogo: to communicate-and-make-decision
-    # =========================================================================
-    def _communicate_and_make_decision(self, node):
-        """
-        單一智能體的交流與決策過程
-        (此方法保留供向後相容及單步執行，主迴路已內聯以提升效能)
-
-        NetLogo 對應:
-          to communicate-and-make-decision
-             set object one-of link-neighbors
-             if (object != nobody)
-                [ communicate ([ act ] of object) act ([ att ] of object) att ]
-             make-decision
-          end
-        """
-        neighbors = self._neighbors_cache.get(node, [])
-        if not neighbors:
-            self._make_decision(node)
-            return
-
-        obj = random.choice(neighbors)
-
-        self._communicate(
-            node,
-            obj,
-            self._states[obj,  self._ACT] != 0.0,   # A1
-            self._states[node, self._ACT] != 0.0,    # A2
-            self._states[obj,  self._ATT],            # B
-            self._states[node, self._ATT]             # C
-        )
-
-        self._make_decision(node)
-
-    # =========================================================================
-    # NetLogo: to communicate [ A1 A2 B C ]
-    # =========================================================================
-    def _communicate(self, node, obj, A1, A2, B, C):
-        """
-        意見交流函數 — BCAT 模型的核心機制
-        (此方法保留供向後相容，主迴路已內聯以提升效能)
-
-        參數說明:
-          node: 當前節點 (自身), obj: 交流對象 (鄰居)
-          A1: 對象的採納狀態 (bool), A2: 自身的採納狀態 (bool)
-          B:  對象的態度值 (float),  C:  自身的態度值 (float)
-
-        NetLogo 對應:
-          to communicate [ A1 A2 B C ]
-             ; A1 = 對象的採用狀態, A2 = 自身的採用狀態
-             ; B  = 對象的態度,     C  = 自身的態度
-             ...
-          end
-
-        前提條件:
-          bounded-confidence (界限置信度) 控制了交流的前提條件。
-          只有當兩者態度差異 |C - B| < bounded-confidence 時才會發生有效交流。
-          這是 Bounded Confidence 模型的核心: 態度差距過大的人不會互相影響。
-
-        BCAT 意見交流規則的語義解釋 (跨語言移植參考):
-        ──────────────────────────────────────────────
-        情境 1: A1=T, A2=F (對象已採用，自身未採用)
-          → 對象有「行動經驗」，對自身有說服力
-          → B > C (對象態度 > 自身態度): 自身「仰望」對象
-            → opinion-2: 只有自身向對象靠近
-          → B ≤ C (對象態度 ≤ 自身態度): 意見相近但自身更積極卻未行動
-            → opinion-1: 雙向趨同
-
-        情境 2: A1=F, A2=T (自身已採用，對象未採用)
-          → 自身有「行動經驗」，對對象有說服力
-          → B > C (對象態度 > 自身態度): 對象本就更積極
-            → opinion-1: 雙向趨同
-          → B ≤ C (對象態度 ≤ 自身態度): 自身「影響」對象
-            → opinion-3: 只有對象向自身靠近
-
-        情境 3: A1=T, A2=T (雙方都已採用)
-          → 同為採用者之間的態度調整，強化共識
-          → 態度較低的一方向較高的一方靠近 (單向收斂)
-          → B > C: opinion-2 (自身靠近)
-          → B ≤ C: opinion-3 (對象靠近)
-
-        情境 4: A1=F, A2=F (雙方都未採用)
-          → 純粹的社交意見交流，無行動經驗的不對稱性
-          → opinion-1: 雙向趨同，不論 B 和 C 的大小關係
-
-        opinion 規則速查:
-          opinion-1 (雙向): C' = round(C + mu*(B-C)),  B' = round(B + mu*(C-B))
-          opinion-2 (僅自身): C' = round(C + mu*(B-C))
-          opinion-3 (僅對象): B' = round(B + mu*(C-B))
-          其中 mu = convergence_rate
-        """
-        if abs(C - B) >= self.bounded_confidence:
-            return
-
-        if A1 and not A2:
-            if B > C:
-                self._change_opinion_2(node, obj, B, C)
-            else:
-                self._change_opinion_1(node, obj, B, C)
-        elif not A1 and A2:
-            if B > C:
-                self._change_opinion_1(node, obj, B, C)
-            else:
-                self._change_opinion_3(node, obj, B, C)
-        elif A1 and A2:
-            if B > C:
-                self._change_opinion_2(node, obj, B, C)
-            else:
-                self._change_opinion_3(node, obj, B, C)
-        elif not A1 and not A2:
-            self._change_opinion_1(node, obj, B, C)
-
-    # =========================================================================
-    # NetLogo: change-opinion-1 / change-opinion-2 / change-opinion-3
-    # =========================================================================
-    def _change_opinion_1(self, node, obj, B, C):
-        """
-        雙向意見交流: 雙方態度相互靠近
-        (此方法保留供向後相容，主迴路已內聯)
-
-        NetLogo 對應:
-          to change-opinion-1 [ B C ]
-             set   att             round((C + convergence-rate * (B - C)))
-             set [ att ] of object round((B + convergence-rate * (C - B)))
-          end
-        """
-        cr = self.convergence_rate
-        self._states[node, self._ATT] = _nl_round(C + cr * (B - C))
-        self._states[obj,  self._ATT] = _nl_round(B + cr * (C - B))
-
-    def _change_opinion_2(self, node, obj, B, C):
-        """
-        單向意見影響: 只有自身態度改變 (向對象靠近)
-        (此方法保留供向後相容，主迴路已內聯)
-
-        NetLogo 對應:
-          to change-opinion-2 [ B C ]
-             set att round((C + convergence-rate * (B - C)))
-          end
-        """
-        self._states[node, self._ATT] = _nl_round(C + self.convergence_rate * (B - C))
-
-    def _change_opinion_3(self, node, obj, B, C):
-        """
-        單向意見影響: 只有對象態度改變 (向自身靠近)
-        (此方法保留供向後相容，主迴路已內聯)
-
-        NetLogo 對應:
-          to change-opinion-3 [ B C ]
-             set [ att ] of object round((B + convergence-rate * (C - B)))
-          end
-        """
-        self._states[obj, self._ATT] = _nl_round(B + self.convergence_rate * (C - B))
-
-    # =========================================================================
-    # NetLogo: to make-decision / become-action / become-susceptible
-    # =========================================================================
-    def _make_decision(self, node):
-        """
-        智能體採納決策
-        (此方法保留供向後相容，主迴路已內聯)
-
-        NetLogo 對應:
-          to make-decision
-             ifelse (act = false
-                     and att > 50
-                     and count link-neighbors != 0
-                     and count link-neighbors with [ act = true ] / count link-neighbors
-                         >= theta / 100)
-                [ become-action ]
-                [ set-agent-color ]
-          end
-
-        語義說明:
-          theta (門檻值, 1~100) 除以 100 轉為比例 (0.01~1.00)。
-          意義: 當「鄰居中已採用者的比例」>= 「個人門檻比例」時，決定採納。
-          例如: theta=40 代表需要 40% 以上鄰居已採用，此節點才會採用。
-          同時必須滿足 att > 50 (態度正面)。
-          這體現了「叫好不叫座」的核心: 即使態度正面，若社交壓力不足仍不會採納。
-        """
-        states = self._states
-        if states[node, self._ACT] != 0.0:
-            return  # 已採納
-
-        if states[node, self._ATT] <= 50:
-            return  # 態度不正面
-
-        neighbors = self._neighbors_cache.get(node, [])
-        if not neighbors:
-            return
-
-        adopter_count = sum(1 for n in neighbors if states[n, self._ACT] != 0.0)
-        adopter_ratio = adopter_count / len(neighbors)
-
-        if adopter_ratio >= states[node, self._THETA] / 100.0:
-            self._become_action(node)
-
-    def _become_action(self, node):
-        """
-        將智能體狀態設為已採納
-        (此方法保留供向後相容，主迴路已內聯)
-
-        NetLogo 對應:
-          to become-action
-             set act  true
-             set time ticks
-          end
-        """
-        self._states[node, self._ACT]  = 1.0
-        self._states[node, self._TIME] = self.current_time
-
-    def _become_susceptible(self, node):
-        """
-        將智能體狀態設為未採納 (易感狀態)
-
-        NetLogo 對應:
-          to become-susceptible
-             set act false
-          end
-        """
-        self._states[node, self._ACT] = 0.0
 
     # =========================================================================
     # NetLogo: to-report critical-point
@@ -1796,7 +1571,7 @@ class ModelVisualizer:
           ┌──────────────────────┬──────────────┐
           │                      │   Social     │
           │  Attitude trajectory │   Network    │
-          │  (大面積主圖)        │              │
+          │  (大面積主圖)          │              │
           │                      │              │
           ├──────┬───────┬───────┬──────────────┤
           │ New  │Attit. │Thres- │ Node degree  │
@@ -2282,16 +2057,6 @@ class ModelVisualizer:
                           format='jpeg', pil_kwargs={'quality': 95})
         del hires_fig
         print(f"Attitude Trajectory saved: {filename}")
-
-    def save_plots(self, filename):
-        """
-        保存圖表為圖片
-
-        對應 NetLogo:
-          export-interface (word "experiment-" exp-no "-interface.png")
-        """
-        if self.fig:
-            self.fig.savefig(filename, dpi=150, bbox_inches='tight')
 
 
 # =============================================================================
