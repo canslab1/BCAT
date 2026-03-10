@@ -1612,7 +1612,7 @@ class ModelVisualizer:
 
         return self.fig
 
-    def setup_network_figure(self, fig_size=(4, 4)):
+    def setup_network_figure(self, fig_size=(5, 5)):
         """
         設定 Social Network 圖的獨立 Figure (嵌入左側控制面板)
 
@@ -1731,7 +1731,7 @@ class ModelVisualizer:
         # 檢測模型重置 → 需要完全重繪
         if self.model.current_time == 0 or self._needs_full_redraw:
             ax.clear()
-            ax.set_title('Attitude Trajectory')
+            ax.set_title('Attitude Trajectory', fontsize=9)
             ax.set_xlabel('Time')
             ax.set_ylabel('Attitude')
             ax.set_ylim(1, 100)
@@ -1805,7 +1805,7 @@ class ModelVisualizer:
         # 檢測模型重置或首次繪製 → 設定標題和軸標籤
         if self._needs_full_redraw or self._adoption_line_adopters is None:
             ax.clear()
-            ax.set_title('Adoption Dynamics')
+            ax.set_title('Adoption Dynamics', fontsize=9)
             ax.set_xlabel('Time')
             ax.set_ylabel('Agent')
             self._adoption_line_adopters = None
@@ -1856,7 +1856,7 @@ class ModelVisualizer:
         # 檢測模型重置或首次繪製 → 設定標題和軸標籤
         if self._needs_full_redraw or self._new_adopter_line is None:
             ax.clear()
-            ax.set_title('New Adopter Dynamics')
+            ax.set_title('New Adopter Dynamics', fontsize=9)
             ax.set_xlabel('Time')
             ax.set_ylabel('Agent')
             self._new_adopter_line = None
