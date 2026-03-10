@@ -63,13 +63,13 @@ python3 BCAT.py
 
 This launches the GUI application with:
 - **Left panel**: Parameter sliders, control buttons, Social Network visualization, and monitors
-  - Social Network (node colors reflect attitudes and adoption status)
-  - Monitors: PA, NA, Avg PA, Std PA, Avg NA, Std NA, Links, Critical Point, Adopter count
-- **Right panel**: Real-time visualization plots (4 rows)
+  - Social Network with legend (red = adopter; green gradient = non-adopter attitude level)
+  - Monitors: Critical (critical point tick), FRI (Favorable Review Index), GSI (Good Sales Index)
+- **Right panel**: Real-time visualization plots (4 rows, all titles in blue bold)
   - Row 1: Attitude Distribution, Threshold Distribution, Degree Distribution
-  - Row 2: Attitude Trajectory (opinion evolution over time, full-width)
-  - Row 3: Adoption Dynamics (adopter vs. non-adopter counts, full-width)
-  - Row 4: New Adopter Dynamics (full-width)
+  - Row 2: Attitude Trajectory with density colorbar legend (full-width, grid lines)
+  - Row 3: Adoption Dynamics (adopter vs. non-adopter counts, full-width, grid lines)
+  - Row 4: New Adopter Dynamics (full-width, grid lines)
 
 ### Controls
 
@@ -142,6 +142,9 @@ The BCAT model operates in the following phases per time step:
 - Both versions produce statistically equivalent results under identical random seeds and parameter settings.
 - **Attitude Trajectory rendering optimization**: scatter points are grouped by color into 15 fixed PathCollection objects and updated incrementally via `set_offsets()`, reducing `draw_idle()` artist traversal from O(T×K) to O(1).
 - **Dual-Figure architecture**: Social Network is rendered on a separate matplotlib Figure embedded in the left panel, allowing the three time-series plots (Attitude Trajectory, Adoption Dynamics, New Adopter Dynamics) to share a full-width X axis (Time) in the right panel.
+- **Evaluation metrics**: FRI (Favorable Review Index = agents with attitude > 50 / total agents) and GSI (Good Sales Index = adopters / total agents) update in real time, displayed to 4 decimal places.
+- **Chart legends**: Attitude Trajectory includes a 15-color density colorbar; Social Network legend shows node color meanings (adopter, attitude levels) without overlapping the graph.
+- **Degree Distribution alignment**: bars are centered on integer ticks using `ax.bar()` instead of `ax.hist()` for accurate visual correspondence.
 
 ## Project Structure
 

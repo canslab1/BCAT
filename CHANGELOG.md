@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.3.0 (2025-03-10)
+
+### Added
+- **FRI & GSI evaluation metrics**: Monitors panel now displays Favorable Review Index (FRI = agents with attitude > 50 / N) and Good Sales Index (GSI = adopters / N) to 4 decimal places, updating in real time.
+- **Chart legends**: Attitude Trajectory shows a horizontal 15-color density colorbar (Few → Many); Social Network shows a non-overlapping legend for node colors (adopter, high/mid/low attitude).
+- **Grid lines**: Adoption Dynamics and New Adopter Dynamics charts now display dashed grid lines for easier reading.
+
+### Improved
+- **Monitors simplified**: removed 9 legacy monitors (PA, NA, Avg PA, Std PA, Avg NA, Std NA, Links, Adopter, Time); kept only Critical, FRI, and GSI.
+- **Chart title styling**: all chart titles rendered in blue bold font with reduced font size (fontsize=9) to avoid overlap with adjacent axis labels.
+- **Social Network enlarged**: figure size increased from (4,4) to (5,5) for better visibility.
+- **Degree Distribution alignment**: replaced `ax.hist()` with `ax.bar()` so bars are centered on integer ticks with no decimal tick marks.
+- **Distribution bar styling**: removed dark edge color from Attitude and Threshold Distribution bars for cleaner appearance.
+- **Window height**: initial window size adjusted to 1400×1150 to ensure all controls and monitors are visible on launch.
+
 ## v1.2.0 (2025-03-10)
 
 ### Improved
