@@ -1622,6 +1622,7 @@ class ModelVisualizer:
         共享相同的全寬 X 軸 (Time)。
         """
         self._network_fig = Figure(figsize=fig_size, dpi=100)
+        self._network_fig.subplots_adjust(bottom=0.08)   # 底部留空間給圖例
         self.axes['network'] = self._network_fig.add_subplot(111)
         return self._network_fig
 
@@ -1691,7 +1692,7 @@ class ModelVisualizer:
         ax.set_aspect('equal')
         ax.set_axis_off()
 
-        # ─── 圖例: 節點顏色說明 ───
+        # ─── 圖例: 節點顏色說明 (置於網絡圖下方，避免遮擋) ───
         legend_handles = [
             Line2D([0], [0], marker='o', color='w',
                    markerfacecolor='red', markersize=5,
@@ -1703,12 +1704,13 @@ class ModelVisualizer:
                    markerfacecolor=(0, 0.5, 0), markersize=5,
                    label='Mid attitude'),
             Line2D([0], [0], marker='o', color='w',
-                   markerfacecolor=(0, 0.05, 0), markersize=5,
+                   markerfacecolor=(0, 0.2, 0), markersize=5,
                    label='Low attitude'),
         ]
-        ax.legend(handles=legend_handles, loc='lower right',
-                  fontsize=5, framealpha=0.7, borderpad=0.3,
-                  handletextpad=0.3, labelspacing=0.2)
+        ax.legend(handles=legend_handles,
+                  loc='upper center', bbox_to_anchor=(0.5, -0.01),
+                  ncol=4, fontsize=5, framealpha=0.7, borderpad=0.3,
+                  handletextpad=0.3, columnspacing=0.8)
 
     # ─── NetLogo 色譜 (類別常數，避免每次重建) ───
     _COLOR_SPECTRUM = [
@@ -1757,24 +1759,17 @@ class ModelVisualizer:
             ax.set_ylim(1, 100)
             ax.grid(True, linestyle='--', alpha=0.3)
 
-            # ─── 圖例: 點的顏色代表該態度值的 agent 密度 ───
-            legend_handles = [
-                Line2D([0], [0], marker='s', color='w',
-                       markerfacecolor='#FFFFFF', markeredgecolor='gray',
-                       markersize=5, label='1 agent'),
-                Line2D([0], [0], marker='s', color='w',
-                       markerfacecolor='#00FF00',
-                       markersize=5, label='Few agents'),
-                Line2D([0], [0], marker='s', color='w',
-                       markerfacecolor='#0000FF',
-                       markersize=5, label='More agents'),
-                Line2D([0], [0], marker='s', color='w',
-                       markerfacecolor='#000000',
-                       markersize=5, label='Most agents'),
-            ]
-            ax.legend(handles=legend_handles, loc='lower right',
-                      fontsize=6, framealpha=0.7, borderpad=0.3,
-                      handletextpad=0.3, labelspacing=0.2)
+            # ─── 圖例: 水平色帶顯示全部 15 種顏色 (agent 密度) ───
+            # 使用 inset_axes 繪製色帶，比文字圖例更完整
+            self._att_traj_cbar = ax.inset_axes([0.58, 0.04, 0.38, 0.03])
+            color_rgb = np.array([[mcolors.to_rgb(c)
+                                   for c in self._COLOR_SPECTRUM]])
+            self._att_traj_cbar.imshow(color_rgb, aspect='auto')
+            self._att_traj_cbar.set_xticks([0, 14])
+            self._att_traj_cbar.set_xticklabels(['Few', 'Many'], fontsize=5)
+            self._att_traj_cbar.set_yticks([])
+            self._att_traj_cbar.set_title('Agent density', fontsize=5, pad=2)
+            self._att_traj_cbar.tick_params(length=2, pad=1)
 
             self._att_traj_last_drawn_time = -1
             # ax.clear() 會移除所有 artist，必須重建 PathCollection 狀態
