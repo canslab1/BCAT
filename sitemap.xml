@@ -1,9 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://canslab1.github.io/BCAT/</loc>
-    <lastmod>2026-03-16</lastmod>
+    <lastmod>2026-03-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://canslab1.github.io/images/software/bcat-gui-overview.png</image:loc>
+      <image:title>BCAT simulator GUI overview — BCAT by Prof. Chung-Yuan Huang (黃崇源教授)</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://canslab1.github.io/images/software/bcat-flowchart.png</image:loc>
+      <image:title>BCAT simulation flowchart — BCAT by Prof. Chung-Yuan Huang (黃崇源教授)</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://canslab1.github.io/images/software/bcat-correlation.png</image:loc>
+      <image:title>BCAT correlation analysis results — BCAT by Prof. Chung-Yuan Huang (黃崇源教授)</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://canslab1.github.io/images/software/bcat-paper.png</image:loc>
+      <image:title>BCAT research paper figure — BCAT by Prof. Chung-Yuan Huang (黃崇源教授)</image:title>
+    </image:image>
   </url>
 </urlset>
