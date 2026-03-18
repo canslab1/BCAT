@@ -2,6 +2,7 @@
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19081523.svg)](https://doi.org/10.5281/zenodo.19081523)
 [![CANS Lab](https://img.shields.io/badge/CANS_Lab-Homepage-orange)](https://canslab1.github.io/)
 
 A mixed opinion dynamics and innovation diffusion simulation model for exploring the "best game no one played" phenomenon.
