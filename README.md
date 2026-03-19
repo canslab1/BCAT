@@ -156,6 +156,38 @@ The BCAT model operates in the following phases per time step:
 - **Chart legends**: Attitude Trajectory includes a 15-color density colorbar; Social Network legend shows node color meanings (adopter, attitude levels) without overlapping the graph.
 - **Degree Distribution alignment**: bars are centered on integer ticks using `ax.bar()` instead of `ax.hist()` for accurate visual correspondence.
 
+## Data
+
+The `data/` directory contains the simulation output data underlying the tables and figures in the accompanying paper. These files constitute the minimal dataset required for replication.
+
+### Sensitivity Analysis (`data/sensitivity_analysis/`)
+
+Raw output from 1,000-run batch experiments across four network topologies, used to generate Table 2 and Figs 7–9 in the paper.
+
+| File | Network Topology | Format |
+|------|-----------------|--------|
+| `sensitivity_analysis_regular_lattice.xlsx` | Regular Lattice (CA) | Excel |
+| `sensitivity_analysis_small_world.xlsx` | Small-World (SWN) | Excel |
+| `sensitivity_analysis_random.xlsx` | Random (RN) | Excel |
+| `sensitivity_analysis_scale_free.xlsx` | Scale-Free (SFN) | Excel |
+
+Each workbook contains per-run records of adoption outcomes (adopter counts, critical points) across systematic parameter sweeps of the five primary model parameters.
+
+### Mechanism Decomposition (`data/mechanism_decomposition/`)
+
+Results from three controlled experiments designed to disentangle the opinion clustering channel and the coordination failure channel in the opinion–adoption gap (Fig 10 in the paper, 30,000 total simulation runs).
+
+| File | Experiment | Topology | Runs | Description |
+|------|-----------|----------|------|-------------|
+| `md_a_lattice.csv` | MD-A | Regular Lattice | 7,000 | Coordination failure isolated (FRI = 1.0 by construction) |
+| `md_a_smallworld.csv` | MD-A | Small-World | 7,000 | Coordination failure isolated (FRI = 1.0 by construction) |
+| `md_b_lattice.csv` | MD-B | Regular Lattice | 1,000 | Opinion clustering isolated (no pioneers, GSI = 0) |
+| `md_b_smallworld.csv` | MD-B | Small-World | 1,000 | Opinion clustering isolated (no pioneers, GSI = 0) |
+| `md_c_lattice.csv` | MD-C | Regular Lattice | 7,000 | Full BCAT baseline (both channels active) |
+| `md_c_smallworld.csv` | MD-C | Small-World | 7,000 | Full BCAT baseline (both channels active) |
+
+**CSV columns**: `experiment` (run index), `fri` (Favorable Review Index at t=300), `gsi` (Good Sales Index at t=300), `adopters` (final adopter count), `N` (population size), `avg_of_thresholds` (threshold parameter), `experiment_id` (MD-A/MD-B/MD-C), `topology` (lattice/smallworld).
+
 ## Project Structure
 
 ```
@@ -168,6 +200,9 @@ BCAT/
 ├── CHANGELOG.md                           # Version history
 ├── CONTRIBUTING.md                        # Contribution guidelines
 ├── COMPLEXITY_ANALYSIS.md                 # Time/space complexity analysis
+├── data/                                  # Simulation output data for paper replication
+│   ├── sensitivity_analysis/              # 1,000-run batch results (4 network topologies)
+│   └── mechanism_decomposition/           # MD-A/B/C experiments (30,000 runs, CSV)
 ├── test_scenarios/                        # Parameter configs for paper reproduction
 │   ├── fig4_favorable_review_good_sales.json
 │   ├── fig5_favorable_review_poor_sales.json
