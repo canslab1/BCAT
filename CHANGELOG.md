@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.4.0 (2026-03-20)
+
+### Added
+- **Simulation data for paper replication**: `data/sensitivity_analysis/` contains raw 1,000-run batch experiment results across four network topologies (xlsx); `data/mechanism_decomposition/` contains MD-A/B/C controlled experiment results (30,000 runs, CSV) for the mechanism decomposition analysis reported in the revised manuscript.
+
 ## v1.3.0 (2025-03-10)
 
 ### Added

@@ -221,7 +221,7 @@ BCAT/
 
 If you use this software in your research, please cite:
 
-> Huang, C.-Y., & Wang, S.-W. (2025). Exploring the "Best Game No One Played" Phenomenon Using A Mixed Opinion Dynamics and Innovation Diffusion Model. *PLOS ONE*. (forthcoming)
+> Huang, C.-Y., & Wang, S.-W. (2026). Exploring the "Best Game No One Played" Phenomenon Using A Mixed Opinion Dynamics and Innovation Diffusion Model. *PLOS ONE*. (forthcoming)
 
 See `CITATION.cff` for machine-readable citation metadata.
 
