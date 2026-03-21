@@ -188,6 +188,26 @@ Results from three controlled experiments designed to disentangle the opinion cl
 
 **CSV columns**: `experiment` (run index), `fri` (Favorable Review Index at t=300), `gsi` (Good Sales Index at t=300), `adopters` (final adopter count), `N` (population size), `avg_of_thresholds` (threshold parameter), `experiment_id` (MD-A/MD-B/MD-C), `topology` (lattice/smallworld).
 
+### Finite-Size Scaling (`data/finite_size_scaling/`)
+
+Results from scaling experiments at N=400, 900, 1,600, and 2,500 agents, confirming that the "best game no one played" phenomenon and the dominance of avg-of-thresholds are robust to system size.
+
+| File | Description |
+|------|-------------|
+| `finite_size_scaling_results.csv` | Raw per-run results across all system sizes |
+| `summary_by_threshold_and_N.csv` | Aggregated mean FRI/GSI by threshold and N |
+
+## Scripts
+
+The `scripts/` directory contains Python scripts for reproducing the paper's analyses and figures:
+
+| Script | Purpose |
+|--------|---------|
+| `reproduce_table2_figs.py` | Reproduce Table 3 and Figs 7–9 from sensitivity analysis data |
+| `generate_table2_and_figs.py` | Generate Table 3 values and figure images |
+| `run_mechanism_decomposition.py` | Run MD-A/B/C mechanism decomposition experiments |
+| `finite_size_scaling.py` | Run finite-size scaling experiments at N=900, 1,600, 2,500 |
+
 ## Project Structure
 
 ```
@@ -202,7 +222,13 @@ BCAT/
 ├── COMPLEXITY_ANALYSIS.md                 # Time/space complexity analysis
 ├── data/                                  # Simulation output data for paper replication
 │   ├── sensitivity_analysis/              # 1,000-run batch results (4 network topologies)
-│   └── mechanism_decomposition/           # MD-A/B/C experiments (30,000 runs, CSV)
+│   ├── mechanism_decomposition/           # MD-A/B/C experiments (30,000 runs, CSV)
+│   └── finite_size_scaling/               # Scaling experiments (N=400–2,500)
+├── scripts/                               # Analysis and experiment scripts
+│   ├── reproduce_table2_figs.py           # Reproduce Table 3 and Figs 7–9
+│   ├── generate_table2_and_figs.py        # Generate Table 3 values and figures
+│   ├── run_mechanism_decomposition.py     # Run MD-A/B/C experiments
+│   └── finite_size_scaling.py             # Run finite-size scaling experiments
 ├── test_scenarios/                        # Parameter configs for paper reproduction
 │   ├── fig4_favorable_review_good_sales.json
 │   ├── fig5_favorable_review_poor_sales.json
