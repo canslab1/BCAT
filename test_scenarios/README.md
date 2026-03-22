@@ -8,9 +8,9 @@ This directory contains parameter configuration files for reproducing the simula
 |------|----------------|-------------|
 | `fig4_favorable_review_good_sales.json` | Figure 4 | Favorable review + good sales (CA network) |
 | `fig5_favorable_review_poor_sales.json` | Figure 5 | Favorable review + poor sales (CA network) |
-| `fig10_opinion_dynamics_only.json` | Figure 10 | Downward compatibility: opinion dynamics only |
-| `fig11_adoption_threshold_only.json` | Figure 11 | Downward compatibility: adoption threshold only |
-| `sensitivity_analysis_1000_runs.json` | Table 2, Figs. 7-9 | Sensitivity analysis parameter ranges |
+| `fig11_opinion_dynamics_only.json` | Figure 11 | Downward compatibility: opinion dynamics only |
+| `fig12_adoption_threshold_only.json` | Figure 12 | Downward compatibility: adoption threshold only |
+| `sensitivity_analysis_1000_runs.json` | Table 3, Figs. 7-9 | Sensitivity analysis parameter ranges |
 
 ## Usage
 

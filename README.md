@@ -7,6 +7,12 @@
 
 A mixed opinion dynamics and innovation diffusion simulation model for exploring the "best game no one played" phenomenon.
 
+## Companion Manuscript Repository
+
+The manuscript source files, figures, and supporting information for the accompanying PLOS ONE paper are hosted separately:
+
+- **Manuscript Repository:** [github.com/canslab1/PLOS-BCAT](https://github.com/canslab1/PLOS-BCAT)
+
 ## Overview
 
 The BCAT (Bounded Confidence + Adoption Threshold) model integrates a bounded confidence-based opinion dynamics model with an adoption threshold innovation diffusion model. It simulates opinion exchanges and product acceptance behaviors across four types of theoretical social networks:
@@ -126,11 +132,11 @@ python3 BCAT.py
 ```
 Then set parameters: no-of-pioneers=5, clustered-pioneers=ON, bounded-confidence=50, convergence-rate=0.1, avg-of-attitudes=50, std-of-attitudes=10, avg-of-thresholds=20, std-of-thresholds=5, network-type=SWN/RN/CA, rewiring-probability=0.00, max-time=300. Click Setup, then Run.
 
-### Scenario 2: Downward Compatibility -- Opinion Dynamics Only (Fig. 10)
+### Scenario 2: Downward Compatibility -- Opinion Dynamics Only (Fig. 11)
 
 Set: avg-of-thresholds=100, std-of-thresholds=0, no-of-pioneers=0, bounded-confidence=10, convergence-rate=0.4, avg-of-attitudes=50, std-of-attitudes=20, network-type=SWN/RN/CA, rewiring-probability=0.00, max-time=300.
 
-### Scenario 3: Downward Compatibility -- Adoption Threshold Only (Fig. 11)
+### Scenario 3: Downward Compatibility -- Adoption Threshold Only (Fig. 12)
 
 Set: avg-of-attitudes=100, std-of-attitudes=0, bounded-confidence=0, avg-of-thresholds=20, std-of-thresholds=10, no-of-pioneers=3, network-type=SWN/RN/CA, rewiring-probability=0.00, max-time=50.
 
@@ -162,7 +168,7 @@ The `data/` directory contains the simulation output data underlying the tables 
 
 ### Sensitivity Analysis (`data/sensitivity_analysis/`)
 
-Raw output from 1,000-run batch experiments across four network topologies, used to generate Table 2 and Figs 7–9 in the paper.
+Raw output from 1,000-run batch experiments across four network topologies, used to generate Table 3 and Figs 7–9 in the paper.
 
 | File | Network Topology | Format |
 |------|-----------------|--------|
@@ -205,6 +211,7 @@ The `scripts/` directory contains Python scripts for reproducing the paper's ana
 |--------|---------|
 | `reproduce_table2_figs.py` | Reproduce Table 3 and Figs 7–9 from sensitivity analysis data |
 | `generate_table2_and_figs.py` | Generate Table 3 values and figure images |
+
 | `run_mechanism_decomposition.py` | Run MD-A/B/C mechanism decomposition experiments |
 | `finite_size_scaling.py` | Run finite-size scaling experiments at N=900, 1,600, 2,500 |
 
@@ -232,8 +239,8 @@ BCAT/
 ├── test_scenarios/                        # Parameter configs for paper reproduction
 │   ├── fig4_favorable_review_good_sales.json
 │   ├── fig5_favorable_review_poor_sales.json
-│   ├── fig10_opinion_dynamics_only.json
-│   ├── fig11_adoption_threshold_only.json
+│   ├── fig11_opinion_dynamics_only.json
+│   ├── fig12_adoption_threshold_only.json
 │   └── sensitivity_analysis_1000_runs.json
 └── LICENSE                                # MIT License
 ```
