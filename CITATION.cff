@@ -20,8 +20,8 @@ authors:
     email: swwang@nkust.edu.tw
 identifiers:
   - type: doi
-    value: '10.5281/zenodo.19081523'
-    description: Zenodo archive DOI
+    value: '10.5281/zenodo.19216365'
+    description: Zenodo archive DOI (v1.1.0)
 repository-code: 'https://github.com/canslab1/BCAT'
 url: 'https://github.com/canslab1/BCAT'
 abstract: >-
