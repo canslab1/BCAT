@@ -3,7 +3,7 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19216365.svg)](https://doi.org/10.5281/zenodo.19216365)
-[![protocols.io](https://img.shields.io/badge/protocols.io-PENDING-yellow)](https://www.protocols.io/view/reproducing-simulation-results-for-the-bcat-model-jwrwcpd7f)
+[![protocols.io](https://img.shields.io/badge/protocols.io-DOI-green)](https://www.protocols.io/view/reproducing-simulation-results-for-the-bcat-model-jwrwcpd7f)
 [![CANS Lab](https://img.shields.io/badge/CANS_Lab-Homepage-orange)](https://canslab1.github.io/)
 
 A mixed opinion dynamics and innovation diffusion simulation model for exploring the "best game no one played" phenomenon.
