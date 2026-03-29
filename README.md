@@ -212,7 +212,6 @@ The `scripts/` directory contains Python scripts for reproducing the paper's ana
 |--------|---------|
 | `reproduce_table3_figs.py` | Reproduce Table 3 and Figs 7–9 from sensitivity analysis data |
 | `generate_table3_and_figs.py` | Generate Table 3 values and figure images |
-
 | `run_mechanism_decomposition.py` | Run MD-A/B/C mechanism decomposition experiments |
 | `finite_size_scaling.py` | Run finite-size scaling experiments at N=900, 1,600, 2,500 |
 

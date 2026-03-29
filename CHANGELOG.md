@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.4.1 (2026-03-29)
+
+### Changed
+- **Renamed analysis scripts** to match manuscript Table 3 numbering: `generate_table2_and_figs.py` → `generate_table3_and_figs.py`, `reproduce_table2_figs.py` → `reproduce_table3_figs.py`.
+
 ## v1.4.0 (2026-03-20)
 
 ### Added
