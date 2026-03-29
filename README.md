@@ -210,8 +210,8 @@ The `scripts/` directory contains Python scripts for reproducing the paper's ana
 
 | Script | Purpose |
 |--------|---------|
-| `reproduce_table2_figs.py` | Reproduce Table 3 and Figs 7–9 from sensitivity analysis data |
-| `generate_table2_and_figs.py` | Generate Table 3 values and figure images |
+| `reproduce_table3_figs.py` | Reproduce Table 3 and Figs 7–9 from sensitivity analysis data |
+| `generate_table3_and_figs.py` | Generate Table 3 values and figure images |
 
 | `run_mechanism_decomposition.py` | Run MD-A/B/C mechanism decomposition experiments |
 | `finite_size_scaling.py` | Run finite-size scaling experiments at N=900, 1,600, 2,500 |
@@ -233,8 +233,8 @@ BCAT/
 │   ├── mechanism_decomposition/           # MD-A/B/C experiments (30,000 runs, CSV)
 │   └── finite_size_scaling/               # Scaling experiments (N=400–2,500)
 ├── scripts/                               # Analysis and experiment scripts
-│   ├── reproduce_table2_figs.py           # Reproduce Table 3 and Figs 7–9
-│   ├── generate_table2_and_figs.py        # Generate Table 3 values and figures
+│   ├── reproduce_table3_figs.py           # Reproduce Table 3 and Figs 7–9
+│   ├── generate_table3_and_figs.py        # Generate Table 3 values and figures
 │   ├── run_mechanism_decomposition.py     # Run MD-A/B/C experiments
 │   └── finite_size_scaling.py             # Run finite-size scaling experiments
 ├── test_scenarios/                        # Parameter configs for paper reproduction
