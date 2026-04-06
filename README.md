@@ -242,7 +242,12 @@ BCAT/
 │   ├── fig11_opinion_dynamics_only.json
 │   ├── fig12_adoption_threshold_only.json
 │   └── sensitivity_analysis_1000_runs.json
-└── LICENSE                                # MIT License
+├── LICENSE                                # MIT License
+├── index.html                             # GitHub Pages landing page
+├── 404.html                               # Custom 404 error page
+├── sitemap.xml                            # XML sitemap for search engines
+├── robots.txt                             # Crawler directives
+└── llms.txt                               # AI-readable project summary
 ```
 
 ## Authors

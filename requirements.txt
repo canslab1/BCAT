@@ -1,3 +1,10 @@
+# Core simulation dependencies
 numpy>=1.24.0
 networkx>=3.0
 matplotlib>=3.7.0
+
+# Dependencies for analysis scripts in scripts/
+pandas>=1.5
+scikit-learn>=1.0
+scipy>=1.9
+openpyxl>=3.0

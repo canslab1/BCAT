@@ -2,7 +2,7 @@
 
 > BCAT is a mixed opinion dynamics and innovation diffusion simulation model for exploring the 'best game no one played' phenomenon, combining bounded confidence opinion formation with adoption threshold innovation diffusion on social networks.
 
-## Author
+## Authors
 
 - Name: Chung-Yuan Huang (黃崇源)
 - Title: Full Professor, Department of CSIE, Chang Gung University
@@ -10,6 +10,10 @@
 - ORCID: https://orcid.org/0000-0002-8680-6755
 - Google Scholar: https://scholar.google.com/citations?user=0klfzfAAAAAJ&hl=en
 - Homepage: https://canslab1.github.io/
+
+- Name: Sheng-Wen Wang
+- Affiliation: Department of Finance and Information, National Kaohsiung University of Science and Technology
+- Email: swwang@nkust.edu.tw
 
 ## Software
 
@@ -21,8 +25,7 @@
 
 ## Publication
 
-Huang, C.-Y. (2022). Why the Best Games May Not Always Win: Innovation Diffusion in Social Networks. IEEE Access, 10, 89199-89213.
-DOI: https://doi.org/10.1109/ACCESS.2022.3200519
+Manuscript under review at PLOS ONE (2026). Related prior work: Huang, C.-Y. (2022). Why the Best Games May Not Always Win: Innovation Diffusion in Social Networks. IEEE Access, 10, 89199-89213. DOI: https://doi.org/10.1109/ACCESS.2022.3200519
 
 ## Lab
 

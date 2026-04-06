@@ -46,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Removed
 - 9 dead code methods (236 lines): `_become_susceptible`, `save_plots`, and 7 inlined methods (`_communicate_and_make_decision`, `_communicate`, `_change_opinion_1/2/3`, `_make_decision`, `_become_action`) that were fully inlined into `_step_all_agents()`.
 
-## v1.0.0 (2025)
+## v1.0.0 (2026-02-21)
 
 Initial public release.
 

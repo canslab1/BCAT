@@ -8,6 +8,7 @@ type: software
 authors:
   - given-names: Chung-Yuan
     family-names: Huang
+    orcid: "https://orcid.org/0000-0002-8680-6755"
     affiliation: >-
       Department of Computer Science and Information
       Engineering, Chang Gung University, Taiwan
@@ -21,7 +22,7 @@ authors:
 identifiers:
   - type: doi
     value: '10.5281/zenodo.19216365'
-    description: Zenodo archive DOI (v1.1.0)
+    description: Zenodo archive DOI (concept DOI, all versions)
 repository-code: 'https://github.com/canslab1/BCAT'
 url: 'https://github.com/canslab1/BCAT'
 abstract: >-
@@ -45,15 +46,3 @@ keywords:
 license: MIT
 version: 1.4.1
 date-released: '2026-03-29'
-preferred-citation:
-  type: article
-  authors:
-    - given-names: Chung-Yuan
-      family-names: Huang
-    - given-names: Sheng-Wen
-      family-names: Wang
-  title: >-
-    Using a Mixed Opinion Dynamics and Innovation Diffusion
-    Model to Explore the "Best Game No One Played" Phenomenon
-  journal: PLOS ONE
-  year: 2026
