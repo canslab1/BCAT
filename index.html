@@ -132,7 +132,413 @@
     <main class="content-wrapper">
         <article class="markdown-body" id="content" aria-live="polite">
             <h1>BCAT — Bounded Confidence and Adoption Threshold Model</h1>
-            <div class="loading">Loading README...</div>
+            <!-- PRERENDER-START -->
+<p><img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-blue">
+<img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green">
+<a href="https://doi.org/10.5281/zenodo.19216365"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.19216365.svg"></a>
+<a href="https://www.protocols.io/view/reproducing-simulation-results-for-the-bcat-model-jwrwcpd7f"><img alt="protocols.io" src="https://img.shields.io/badge/protocols.io-DOI-green"></a>
+<a href="https://canslab1.github.io/"><img alt="CANS Lab" src="https://img.shields.io/badge/CANS_Lab-Homepage-orange"></a></p>
+<p>A mixed opinion dynamics and innovation diffusion simulation model for exploring the "best game no one played" phenomenon.</p>
+<h2 id="companion-manuscript-repository">Companion Manuscript Repository</h2>
+<p>The manuscript source files, figures, and supporting information for the accompanying PLOS ONE paper are hosted separately:</p>
+<ul>
+<li><strong>Manuscript Repository:</strong> <a href="https://github.com/canslab1/PLOS-BCAT">github.com/canslab1/PLOS-BCAT</a></li>
+</ul>
+<h2 id="overview">Overview</h2>
+<p>The BCAT (Bounded Confidence + Adoption Threshold) model integrates a bounded confidence-based opinion dynamics model with an adoption threshold innovation diffusion model. It simulates opinion exchanges and product acceptance behaviors across four types of theoretical social networks:</p>
+<ul>
+<li><strong>Regular Lattice (CA)</strong>: Toroidal 2D cellular automata with Moore neighborhood (rewiring probability = 0)</li>
+<li><strong>Small-World Network (SWN)</strong>: Watts-Strogatz model (0 &lt; rewiring probability &lt; 1)</li>
+<li><strong>Random Network (RN)</strong>: Fully rewired network (rewiring probability = 1)</li>
+<li><strong>Scale-Free Network (SFN)</strong>: Barabasi-Albert preferential attachment model</li>
+</ul>
+<p>Each simulation consists of 400 agents connected by approximately 1,600 edges, with an average of 8 neighbors per agent.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>Mixed model</strong> — Integrates bounded confidence opinion dynamics with adoption threshold innovation diffusion in a single simulation.</li>
+<li><strong>Four network topologies</strong> — Regular Lattice (CA), Small-World (SWN), Random (RN), and Scale-Free (SFN) networks.</li>
+<li><strong>Interactive GUI</strong> — Tkinter-based interface with real-time visualization of attitude trajectories, social networks, adoption dynamics, and distributions.</li>
+<li><strong>Batch experiments</strong> — Run multiple repetitions with automatic result aggregation.</li>
+<li><strong>Reproducible scenarios</strong> — Pre-configured parameter files for reproducing all key paper figures.</li>
+<li><strong>Dual implementation</strong> — Both Python 3 (with GUI) and NetLogo 4.0.5 versions producing statistically equivalent results.</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<h3 id="python-version">Python Version</h3>
+<ul>
+<li>Python 3.10 or later (tested on Python 3.12 and 3.13)</li>
+</ul>
+<h3 id="setup">Setup</h3>
+<pre><code class="language-bash">git clone https://github.com/canslab1/BCAT.git
+cd BCAT
+pip install -r requirements.txt
+</code></pre>
+<h3 id="dependencies">Dependencies</h3>
+<p>Install all required packages:</p>
+<pre><code class="language-bash">pip install -r requirements.txt
+</code></pre>
+<p>Or install individually:</p>
+<pre><code class="language-bash">pip install numpy&gt;=1.24.0 networkx&gt;=3.0 matplotlib&gt;=3.7.0
+</code></pre>
+<h3 id="standard-library-modules-no-installation-needed">Standard Library Modules (no installation needed)</h3>
+<p><code>tkinter</code>, <code>random</code>, <code>os</code>, <code>time</code>, <code>math</code>, <code>threading</code>, <code>pickle</code>, <code>warnings</code></p>
+<h3 id="netlogo-version-for-nlogo-file">NetLogo Version (for <code>.nlogo</code> file)</h3>
+<ul>
+<li>NetLogo 4.0.5 or later (available at https://ccl.northwestern.edu/netlogo/)</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<h3 id="python-version_1">Python Version</h3>
+<pre><code class="language-bash">python3 BCAT.py
+</code></pre>
+<p>This launches the GUI application with:
+- <strong>Left panel</strong>: Parameter sliders, control buttons, Social Network visualization, and monitors
+  - Social Network with legend (red = adopter; green gradient = non-adopter attitude level)
+  - Monitors: Critical (critical point tick), FRI (Favorable Review Index), GSI (Good Sales Index)
+- <strong>Right panel</strong>: Real-time visualization plots (4 rows, all titles in blue bold)
+  - Row 1: Attitude Distribution, Threshold Distribution, Degree Distribution
+  - Row 2: Attitude Trajectory with density colorbar legend (full-width, grid lines)
+  - Row 3: Adoption Dynamics (adopter vs. non-adopter counts, full-width, grid lines)
+  - Row 4: New Adopter Dynamics (full-width, grid lines)</p>
+<h3 id="controls">Controls</h3>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Setup</strong></td>
+<td>Initialize the network and agent population</td>
+</tr>
+<tr>
+<td><strong>Run</strong></td>
+<td>Execute a complete simulation run (max-time steps)</td>
+</tr>
+<tr>
+<td><strong>Run Once</strong></td>
+<td>Execute a single time step</td>
+</tr>
+<tr>
+<td><strong>Experiments</strong></td>
+<td>Run batch experiments (no-of-experiments repetitions)</td>
+</tr>
+<tr>
+<td><strong>Save</strong></td>
+<td>Save current model state</td>
+</tr>
+<tr>
+<td><strong>Load</strong></td>
+<td>Load a previously saved model state</td>
+</tr>
+</tbody>
+</table>
+<h3 id="netlogo-version">NetLogo Version</h3>
+<ol>
+<li>Open <code>English - best game no one played.nlogo</code> in NetLogo 4.0.5+</li>
+<li>Adjust parameters using the interface sliders</li>
+<li>Click "Setup" to initialize, then "Run once" to execute</li>
+</ol>
+<h2 id="model-parameters">Model Parameters</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Range</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>no-of-pioneers</code></td>
+<td>0 -- 100</td>
+<td>5</td>
+<td>Number of initial adopter agents</td>
+</tr>
+<tr>
+<td><code>clustered-pioneers?</code></td>
+<td>ON/OFF</td>
+<td>ON</td>
+<td>Whether pioneers are spatially clustered</td>
+</tr>
+<tr>
+<td><code>bounded-confidence</code></td>
+<td>0 -- 90</td>
+<td>50</td>
+<td>Attitude distance threshold for opinion exchange</td>
+</tr>
+<tr>
+<td><code>convergence-rate</code></td>
+<td>0.1 -- 1.0</td>
+<td>0.1</td>
+<td>Rate of attitude adjustment per exchange</td>
+</tr>
+<tr>
+<td><code>avg-of-attitudes</code></td>
+<td>10 -- 100</td>
+<td>50</td>
+<td>Mean of initial attitude distribution</td>
+</tr>
+<tr>
+<td><code>std-of-attitudes</code></td>
+<td>0 -- 30</td>
+<td>10</td>
+<td>Std. dev. of initial attitude distribution</td>
+</tr>
+<tr>
+<td><code>avg-of-thresholds</code></td>
+<td>10 -- 100</td>
+<td>40</td>
+<td>Mean of adoption threshold distribution</td>
+</tr>
+<tr>
+<td><code>std-of-thresholds</code></td>
+<td>0 -- 30</td>
+<td>10</td>
+<td>Std. dev. of adoption threshold distribution</td>
+</tr>
+<tr>
+<td><code>network-type</code></td>
+<td>SFN / SWN</td>
+<td>SWN/RN/CA</td>
+<td>Social network topology</td>
+</tr>
+<tr>
+<td><code>rewiring-probability</code></td>
+<td>0.00 -- 1.00</td>
+<td>0.00</td>
+<td>Network rewiring probability (SWN only)</td>
+</tr>
+<tr>
+<td><code>max-time</code></td>
+<td>50 -- 1000</td>
+<td>300</td>
+<td>Maximum simulation time steps</td>
+</tr>
+<tr>
+<td><code>no-of-experiments</code></td>
+<td>10 -- 1000</td>
+<td>20</td>
+<td>Number of batch experiment repetitions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reproducing-paper-results">Reproducing Paper Results</h2>
+<p>Parameter configuration files for reproducing the simulation scenarios presented in the paper are provided in the <code>test_scenarios/</code> directory.</p>
+<h3 id="scenario-1-favorable-review-good-sales-fig-4">Scenario 1: Favorable Review + Good Sales (Fig. 4)</h3>
+<pre><code>python3 BCAT.py
+</code></pre>
+<p>Then set parameters: no-of-pioneers=5, clustered-pioneers=ON, bounded-confidence=50, convergence-rate=0.1, avg-of-attitudes=50, std-of-attitudes=10, avg-of-thresholds=20, std-of-thresholds=5, network-type=SWN/RN/CA, rewiring-probability=0.00, max-time=300. Click Setup, then Run.</p>
+<h3 id="scenario-2-downward-compatibility-opinion-dynamics-only-fig-11">Scenario 2: Downward Compatibility -- Opinion Dynamics Only (Fig. 11)</h3>
+<p>Set: avg-of-thresholds=100, std-of-thresholds=0, no-of-pioneers=0, bounded-confidence=10, convergence-rate=0.4, avg-of-attitudes=50, std-of-attitudes=20, network-type=SWN/RN/CA, rewiring-probability=0.00, max-time=300.</p>
+<h3 id="scenario-3-downward-compatibility-adoption-threshold-only-fig-12">Scenario 3: Downward Compatibility -- Adoption Threshold Only (Fig. 12)</h3>
+<p>Set: avg-of-attitudes=100, std-of-attitudes=0, bounded-confidence=0, avg-of-thresholds=20, std-of-thresholds=10, no-of-pioneers=3, network-type=SWN/RN/CA, rewiring-probability=0.00, max-time=50.</p>
+<h2 id="model-algorithm">Model Algorithm</h2>
+<p>The BCAT model operates in the following phases per time step:</p>
+<ol>
+<li><strong>Agent Selection</strong>: All agents are processed in random order each tick.</li>
+<li><strong>Neighbor Selection</strong>: Each agent randomly selects one neighboring agent.</li>
+<li><strong>Opinion Exchange</strong>: If the attitude difference is below the bounded confidence threshold, attitudes are adjusted according to four scenarios based on adoption status (see Algorithm 3 in the paper).</li>
+<li><strong>Adoption Decision</strong>: A not-yet-adopted agent with a positive attitude (att &gt; 50) adopts if the proportion of adopted neighbors exceeds its adoption threshold.</li>
+</ol>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>The Python version faithfully replicates the NetLogo 4.0.5 implementation, including the sequential execution semantics of NetLogo's <code>ask-concurrent</code> (which processes agents in random order with immediate effect).</li>
+<li><code>int(v + 0.5)</code> is used as an equivalent to NetLogo's <code>round()</code> for positive values.</li>
+<li>NumPy arrays replace NetLogo's <code>turtles-own</code> for performance optimization.</li>
+<li>NetworkX graphs replace NetLogo's native turtle/link network structure.</li>
+<li>Both versions produce statistically equivalent results under identical random seeds and parameter settings.</li>
+<li><strong>Attitude Trajectory rendering optimization</strong>: scatter points are grouped by color into 15 fixed PathCollection objects and updated incrementally via <code>set_offsets()</code>, reducing <code>draw_idle()</code> artist traversal from O(T×K) to O(1).</li>
+<li><strong>Dual-Figure architecture</strong>: Social Network is rendered on a separate matplotlib Figure embedded in the left panel, allowing the three time-series plots (Attitude Trajectory, Adoption Dynamics, New Adopter Dynamics) to share a full-width X axis (Time) in the right panel.</li>
+<li><strong>Evaluation metrics</strong>: FRI (Favorable Review Index = agents with attitude &gt; 50 / total agents) and GSI (Good Sales Index = adopters / total agents) update in real time, displayed to 4 decimal places.</li>
+<li><strong>Chart legends</strong>: Attitude Trajectory includes a 15-color density colorbar; Social Network legend shows node color meanings (adopter, attitude levels) without overlapping the graph.</li>
+<li><strong>Degree Distribution alignment</strong>: bars are centered on integer ticks using <code>ax.bar()</code> instead of <code>ax.hist()</code> for accurate visual correspondence.</li>
+</ul>
+<h2 id="data">Data</h2>
+<p>The <code>data/</code> directory contains the simulation output data underlying the tables and figures in the accompanying paper. These files constitute the minimal dataset required for replication.</p>
+<h3 id="sensitivity-analysis-datasensitivity_analysis">Sensitivity Analysis (<code>data/sensitivity_analysis/</code>)</h3>
+<p>Raw output from 1,000-run batch experiments across four network topologies, used to generate Table 3 and Figs 7–9 in the paper.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Network Topology</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sensitivity_analysis_regular_lattice.xlsx</code></td>
+<td>Regular Lattice (CA)</td>
+<td>Excel</td>
+</tr>
+<tr>
+<td><code>sensitivity_analysis_small_world.xlsx</code></td>
+<td>Small-World (SWN)</td>
+<td>Excel</td>
+</tr>
+<tr>
+<td><code>sensitivity_analysis_random.xlsx</code></td>
+<td>Random (RN)</td>
+<td>Excel</td>
+</tr>
+<tr>
+<td><code>sensitivity_analysis_scale_free.xlsx</code></td>
+<td>Scale-Free (SFN)</td>
+<td>Excel</td>
+</tr>
+</tbody>
+</table>
+<p>Each workbook contains per-run records of adoption outcomes (adopter counts, critical points) across systematic parameter sweeps of the five primary model parameters.</p>
+<h3 id="mechanism-decomposition-datamechanism_decomposition">Mechanism Decomposition (<code>data/mechanism_decomposition/</code>)</h3>
+<p>Results from three controlled experiments designed to disentangle the opinion clustering channel and the coordination failure channel in the opinion–adoption gap (Fig 10 in the paper, 30,000 total simulation runs).</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Experiment</th>
+<th>Topology</th>
+<th>Runs</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>md_a_lattice.csv</code></td>
+<td>MD-A</td>
+<td>Regular Lattice</td>
+<td>7,000</td>
+<td>Coordination failure isolated (FRI = 1.0 by construction)</td>
+</tr>
+<tr>
+<td><code>md_a_smallworld.csv</code></td>
+<td>MD-A</td>
+<td>Small-World</td>
+<td>7,000</td>
+<td>Coordination failure isolated (FRI = 1.0 by construction)</td>
+</tr>
+<tr>
+<td><code>md_b_lattice.csv</code></td>
+<td>MD-B</td>
+<td>Regular Lattice</td>
+<td>1,000</td>
+<td>Opinion clustering isolated (no pioneers, GSI = 0)</td>
+</tr>
+<tr>
+<td><code>md_b_smallworld.csv</code></td>
+<td>MD-B</td>
+<td>Small-World</td>
+<td>1,000</td>
+<td>Opinion clustering isolated (no pioneers, GSI = 0)</td>
+</tr>
+<tr>
+<td><code>md_c_lattice.csv</code></td>
+<td>MD-C</td>
+<td>Regular Lattice</td>
+<td>7,000</td>
+<td>Full BCAT baseline (both channels active)</td>
+</tr>
+<tr>
+<td><code>md_c_smallworld.csv</code></td>
+<td>MD-C</td>
+<td>Small-World</td>
+<td>7,000</td>
+<td>Full BCAT baseline (both channels active)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CSV columns</strong>: <code>experiment</code> (run index), <code>fri</code> (Favorable Review Index at t=300), <code>gsi</code> (Good Sales Index at t=300), <code>adopters</code> (final adopter count), <code>N</code> (population size), <code>avg_of_thresholds</code> (threshold parameter), <code>experiment_id</code> (MD-A/MD-B/MD-C), <code>topology</code> (lattice/smallworld).</p>
+<h3 id="finite-size-scaling-datafinite_size_scaling">Finite-Size Scaling (<code>data/finite_size_scaling/</code>)</h3>
+<p>Results from scaling experiments at N=400, 900, 1,600, and 2,500 agents, confirming that the "best game no one played" phenomenon and the dominance of avg-of-thresholds are robust to system size.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>finite_size_scaling_results.csv</code></td>
+<td>Raw per-run results across all system sizes</td>
+</tr>
+<tr>
+<td><code>summary_by_threshold_and_N.csv</code></td>
+<td>Aggregated mean FRI/GSI by threshold and N</td>
+</tr>
+</tbody>
+</table>
+<h2 id="scripts">Scripts</h2>
+<p>The <code>scripts/</code> directory contains Python scripts for reproducing the paper's analyses and figures:</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reproduce_table3_figs.py</code></td>
+<td>Reproduce Table 3 and Figs 7–9 from sensitivity analysis data</td>
+</tr>
+<tr>
+<td><code>generate_table3_and_figs.py</code></td>
+<td>Generate Table 3 values and figure images</td>
+</tr>
+<tr>
+<td><code>run_mechanism_decomposition.py</code></td>
+<td>Run MD-A/B/C mechanism decomposition experiments</td>
+</tr>
+<tr>
+<td><code>finite_size_scaling.py</code></td>
+<td>Run finite-size scaling experiments at N=900, 1,600, 2,500</td>
+</tr>
+</tbody>
+</table>
+<h2 id="project-structure">Project Structure</h2>
+<pre><code>BCAT/
+├── BCAT.py                                # Python 3 implementation with GUI (Tkinter + matplotlib)
+├── English - best game no one played.nlogo # NetLogo 4.0.5 implementation
+├── requirements.txt                       # Python dependencies
+├── pyproject.toml                         # Project metadata (PEP 621)
+├── CITATION.cff                           # Citation metadata
+├── CHANGELOG.md                           # Version history
+├── CONTRIBUTING.md                        # Contribution guidelines
+├── COMPLEXITY_ANALYSIS.md                 # Time/space complexity analysis
+├── data/                                  # Simulation output data for paper replication
+│   ├── sensitivity_analysis/              # 1,000-run batch results (4 network topologies)
+│   ├── mechanism_decomposition/           # MD-A/B/C experiments (30,000 runs, CSV)
+│   └── finite_size_scaling/               # Scaling experiments (N=400–2,500)
+├── scripts/                               # Analysis and experiment scripts
+│   ├── reproduce_table3_figs.py           # Reproduce Table 3 and Figs 7–9
+│   ├── generate_table3_and_figs.py        # Generate Table 3 values and figures
+│   ├── run_mechanism_decomposition.py     # Run MD-A/B/C experiments
+│   └── finite_size_scaling.py             # Run finite-size scaling experiments
+├── test_scenarios/                        # Parameter configs for paper reproduction
+│   ├── fig4_favorable_review_good_sales.json
+│   ├── fig5_favorable_review_poor_sales.json
+│   ├── fig11_opinion_dynamics_only.json
+│   ├── fig12_adoption_threshold_only.json
+│   └── sensitivity_analysis_1000_runs.json
+├── LICENSE                                # MIT License
+├── index.html                             # GitHub Pages landing page
+├── 404.html                               # Custom 404 error page
+├── sitemap.xml                            # XML sitemap for search engines
+├── robots.txt                             # Crawler directives
+└── llms.txt                               # AI-readable project summary
+</code></pre>
+<h2 id="authors">Authors</h2>
+<ul>
+<li><strong>Chung-Yuan Huang</strong> (黃崇源) — Department of Computer Science and Information Engineering, Chang Gung University, Taiwan (gscott@mail.cgu.edu.tw)</li>
+<li><strong>Sheng-Wen Wang</strong> (Corresponding author) — Department of Finance and Information, National Kaohsiung University of Science and Technology, Taiwan (swwang@nkust.edu.tw)</li>
+</ul>
+<h2 id="citation">Citation</h2>
+<p>See <code>CITATION.cff</code> for machine-readable citation metadata.</p>
+<h2 id="license">License</h2>
+<p>This project is licensed under the MIT License. See <a href="LICENSE">LICENSE</a> for details.</p>
+<!-- PRERENDER-END -->
         </article>
     </main>
     <footer class="site-footer">
