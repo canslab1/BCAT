@@ -39,3 +39,6 @@ profile_bcat.py
 experiments/
 output/
 Attitude-Trajectory-*.jpeg
+
+# Deleted files staging area
+deleted/
